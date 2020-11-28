@@ -6,7 +6,7 @@ This plugin uses the perl scripts of japi-compliance-checker directly. So japi-c
 
 
 == NOTE
-If this plug in run an a mahine where japi-compliance-checker is not install, no action will be taken. The build will not  failed.
+If this plug in run an a mahine where japi-compliance-checker is not install, no action will be taken. The build will not failed.
 
 
 == Install
