@@ -39,14 +39,18 @@ public class BinaryCompatibilityEnforcerPluginMogo extends AbstractMojo {
     double binaryCompatibilityPercentageRequired;
 
 
-
     public void execute() throws MojoExecutionException {
 
         getLog().info(String.format("%s\nBINARY COMPATIBILITY ENFORCER\n%s", BAR, BAR));
 
         getLog().info("Starting...");
 
-        checkJavaAPIComplianceCheckerInstalled();
+        try {
+            checkJavaAPIComplianceCheckerInstalled();
+        } catch (MojoExecutionException e) {
+            getLog().warn(e.getMessage(), e);
+            return;
+        }
 
         final Build build = project.getBuild();
         if (build == null) {
@@ -163,7 +167,7 @@ public class BinaryCompatibilityEnforcerPluginMogo extends AbstractMojo {
             final String command = format(expression, jar1, jar2);
 
             getLog().debug("command=" + command);
-            p =  new ProcessBuilder("/bin/sh", "-c", command).start();
+            p = new ProcessBuilder("/bin/sh", "-c", command).start();
 
             final BufferedReader stdInput = new BufferedReader(new
                     InputStreamReader(p.getInputStream()));
@@ -223,7 +227,6 @@ public class BinaryCompatibilityEnforcerPluginMogo extends AbstractMojo {
             throw new MojoExecutionException(e.getMessage(), e);
         }
     }
-
 
 
     public void checkJavaAPIComplianceCheckerInstalled() throws MojoExecutionException {
