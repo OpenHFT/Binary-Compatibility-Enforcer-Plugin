@@ -1,4 +1,4 @@
-== Parameters
+== Overview
 
 This is a maven plugin that wraps - https://github.com/lvc/japi-compliance-checker
 
