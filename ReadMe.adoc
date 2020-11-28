@@ -24,7 +24,9 @@ If this plug in run an a mahine where japi-compliance-checker is not install, no
 $chmod -R 775 <path>
 ----
 
-=== add it the japi-compliance-checker to your path
+=== Path 
+
+Add the japi-compliance-checker to your path
 
 for example on a mac if you have installed it to ~/projects/japi-compliance-checker
 
