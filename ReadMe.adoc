@@ -71,7 +71,7 @@ The reference version my either be provided or available as the <x>.<y>.0 versio
 === expression
 
 `japi-compliance-checker.pl -lib NAME %s %s`
-the %s are the first and second jars
+the %s are the first and second jars, these jar will be filled in by this plugin at runtime.
 
 This is the expression that is passed directly to japi-compliance-checker.pl, for more information on the options see https://github.com/lvc/japi-compliance-checker
 
