@@ -1,0 +1,64 @@
+== Parameters
+
+|===
+| parameter  | default value | Example | Required / Optional
+
+| expression
+| japi-compliance-checker.pl -lib NAME %s %s
+|
+| optional
+
+| referenceVersion
+| <x>.<y>.0
+| 5.20.120
+| optional
+
+| binaryCompatibilityPercentageRequired
+| 100
+|
+| optional
+
+|===
+
+=== Reference Version
+
+The reference version my either be provided or available as the <x>.<y>.0 version, for example assume that you where on 5.20.143-SNAPSHOT then this would be checked ( by default ) against 5.20.0 but only if this version exists.
+
+=== expression
+
+`japi-compliance-checker.pl -lib NAME %s %s`
+the %s are the first and second jars
+
+This is the expression that is passed directly to japi-compliance-checker.pl, for more information on the options see https://github.com/lvc/japi-compliance-checker
+
+
+=== binaryCompatibilityPercentageRequired
+
+when the `japi-compliance-checker.pl` is run, it provides a value for `binary compatibility` if the value that is reported is lower than the value you set, this enforcer plugin will fail the validation as produce a local link to the html a report.
+
+== Maven
+
+[source,xml]
+----
+<plugin>
+    <groupId>software.chronicle</groupId>
+    <artifactId>binary-compatibility-enforcer-plugin</artifactId>
+    <version>1.0.0</version>
+    <executions>
+        <execution>
+            <phase>verify</phase>
+            <goals>
+                <goal>enforcer</goal>
+            </goals>
+            <configuration>
+                <!-- the version that it checks against -->
+                <!-- if not set it will check against the <x>.<y>.0 version -->
+                <referenceVersion>2.20.2</referenceVersion>
+
+                <expression>japi-compliance-checker.pl -lib NAME %s %s</expression>
+            </configuration>
+        </execution>
+    </executions>
+</plugin>
+----
+
