@@ -33,9 +33,12 @@ for example on a mac if you have installed it to ~/projects/japi-compliance-chec
 [source,shell script]
 ----
 $vi ~/.profile
+----
 
-add the following
+add the following:
 
+[source,shell script]
+----
 export PATH="$PATH:~/projects/japi-compliance-checker"
 ----
 
