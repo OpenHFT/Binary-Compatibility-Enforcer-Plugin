@@ -1,5 +1,39 @@
 == Parameters
 
+This is a maven plugin that wraps - https://github.com/lvc/japi-compliance-checker
+
+This plugin uses the perl scripts of japi-compliance-checker directly. So japi-compliance-checker has to be installed and available on your $PATH.
+
+== Install
+
+* https://github.com/lvc/japi-compliance-checker#install
+* JDK or OpenJDK - development files
+* maven
+* Perl 5
+
+
+=== set the approximate permission
+
+[source,shell script]
+----
+$chmod -R 775 <path>
+----
+
+=== add it the japi-compliance-checker to your path
+
+for example on a mac if you have installed it to ~/projects/japi-compliance-checker
+
+[source,shell script]
+----
+$vi ~/.profile
+
+add the following
+
+export PATH="$PATH:~/projects/japi-compliance-checker"
+----
+
+== Configuration
+
 |===
 | parameter  | default value | Example | Required / Optional
 
@@ -31,7 +65,6 @@ the %s are the first and second jars
 
 This is the expression that is passed directly to japi-compliance-checker.pl, for more information on the options see https://github.com/lvc/japi-compliance-checker
 
-
 === binaryCompatibilityPercentageRequired
 
 when the `japi-compliance-checker.pl` is run, it provides a value for `binary compatibility` if the value that is reported is lower than the value you set, this enforcer plugin will fail the validation as produce a local link to the html a report.
@@ -56,6 +89,7 @@ when the `japi-compliance-checker.pl` is run, it provides a value for `binary co
                 <referenceVersion>2.20.2</referenceVersion>
 
                 <expression>japi-compliance-checker.pl -lib NAME %s %s</expression>
+
             </configuration>
         </execution>
     </executions>
