@@ -4,6 +4,11 @@ This is a maven plugin that wraps - https://github.com/lvc/japi-compliance-check
 
 This plugin uses the perl scripts of japi-compliance-checker directly. So japi-compliance-checker has to be installed and available on your $PATH.
 
+
+== NOTE
+If this plug in run an a mahine where japi-compliance-checker is not install, no action will be taken. The build will not  failed.
+
+
 == Install
 
 * https://github.com/lvc/japi-compliance-checker#install
