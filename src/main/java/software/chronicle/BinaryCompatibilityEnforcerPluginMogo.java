@@ -241,10 +241,9 @@ public class BinaryCompatibilityEnforcerPluginMogo extends AbstractMojo {
             stdError = new BufferedReader(new
                     InputStreamReader(p.getErrorStream()));
 
-            stdInput.readLine();
             final String firstLine = stdInput.readLine();
 
-            if (!firstLine.startsWith("Java API Compliance Checker")) {
+            if (firstLine == null || !firstLine.startsWith("Java API Compliance Checker")) {
                 throw new MojoExecutionException("Unable to load Java API Compliance Checker, please add it your $PATH and check it permissions.");
             }
 
