@@ -47,7 +47,7 @@ public class BinaryCompatibilityEnforcerPluginMogo extends AbstractMojo {
 
         try {
             checkJavaAPIComplianceCheckerInstalled();
-        } catch (MojoExecutionException e) {
+        } catch (final MojoExecutionException e) {
             getLog().warn(e.getMessage(), e);
             return;
         }
@@ -63,7 +63,27 @@ public class BinaryCompatibilityEnforcerPluginMogo extends AbstractMojo {
 
         getLog().info(referenceVersion);
 
-        String pathToJar1 = null;
+        final String pathToJar1 = referencePath(groupId, artifactId, outputDirectory);
+
+        getLog().debug("pathToJar1=" + pathToJar1);
+
+        final String directory = build.getDirectory();
+
+        final String finalName = project.getBuild().getFinalName();
+        final String pathToJar2 = format("%s%s%s.jar", directory, File.separator, finalName);
+
+        getLog().debug("pathToJar2=" + pathToJar2);
+
+        if (finalName.endsWith("0-SNAPSHOT.jar") || finalName.endsWith("0.jar"))
+            return;
+
+        checkBinaryCompatibility(pathToJar1, pathToJar2);
+    }
+
+    private String referencePath(final String groupId,
+                                 final String artifactId,
+                                 final String outputDirectory) throws MojoExecutionException {
+        String pathToJar1 =null;
         if (referenceVersion == null || referenceVersion.isEmpty()) {
 
             String version = project.getVersion();
@@ -79,7 +99,7 @@ public class BinaryCompatibilityEnforcerPluginMogo extends AbstractMojo {
                                 artifactId,
                                 referenceVersion,
                                 outputDirectory).getAbsolutePath();
-                    } catch (Exception e) {
+                    } catch (final Exception e) {
                         throw new MojoExecutionException("Please set <referenceVersion> config, can not download default version=" + referenceVersion + " of " + artifactId, e);
                     }
 
@@ -100,24 +120,11 @@ public class BinaryCompatibilityEnforcerPluginMogo extends AbstractMojo {
                     artifactId,
                     referenceVersion,
                     outputDirectory).getAbsolutePath();
-
-        getLog().debug("pathToJar1=" + pathToJar1);
-
-        final String directory = build.getDirectory();
-
-        final String finalName = project.getBuild().getFinalName();
-        final String pathToJar2 = format("%s%s%s.jar", directory, File.separator, finalName);
-
-        getLog().debug("pathToJar2=" + pathToJar2);
-
-        if (finalName.endsWith("0-SNAPSHOT.jar") || finalName.endsWith("0.jar"))
-            return;
-
-        checkBinaryCompatibility(pathToJar1, pathToJar2);
+        return pathToJar1;
     }
 
 
-    private File downloadArtifact(final String group, final String artifactId, final String version, String target) throws MojoExecutionException {
+    private File downloadArtifact(final String group, final String artifactId, final String version, final String target) throws MojoExecutionException {
         final File tempFile = new File(target, artifactId + "-" + version + ".jar");
         tempFile.delete();
         final String command = String.format("mvn dependency:get -Dartifact=%s:%s:%s:jar -Dtransitive=false -Ddest=%s -DremoteRepositories=chronicle-enterprise-release::::https://nexus.chronicle.software/content/repositories/releases ", group, artifactId, version, tempFile);
@@ -150,7 +157,7 @@ public class BinaryCompatibilityEnforcerPluginMogo extends AbstractMojo {
                 getLog().debug(s1);
             }
             return tempFile;
-        } catch (Exception e) {
+        } catch (final Exception e) {
             dumpErrorToConsole(stdError);
             throw new MojoExecutionException(e.getMessage(), e);
         } finally {
@@ -240,11 +247,11 @@ public class BinaryCompatibilityEnforcerPluginMogo extends AbstractMojo {
 
             stdError = new BufferedReader(new
                     InputStreamReader(p.getErrorStream()));
-
+            stdInput.readLine();
             final String firstLine = stdInput.readLine();
 
             if (firstLine == null || !firstLine.startsWith("Java API Compliance Checker")) {
-                throw new MojoExecutionException("Unable to load Java API Compliance Checker, please add it your $PATH and check it permissions.");
+                throw new MojoExecutionException("Unable to load Java API Compliance Checker, please add it your $PATH and check its permissions.");
             }
 
             getLog().info("Java API Compliance Checker - correctly installed");
@@ -257,12 +264,12 @@ public class BinaryCompatibilityEnforcerPluginMogo extends AbstractMojo {
         }
     }
 
-    private void shutdown(Process p) {
+    private void shutdown(final Process p) {
         if (p != null) {
             p.destroy();
             try {
                 p.waitFor(1, TimeUnit.SECONDS);
-            } catch (InterruptedException e) {
+            } catch (final InterruptedException e) {
                 p.destroyForcibly();
             }
         }
