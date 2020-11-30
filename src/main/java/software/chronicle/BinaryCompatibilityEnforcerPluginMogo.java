@@ -29,7 +29,7 @@ public class BinaryCompatibilityEnforcerPluginMogo extends AbstractMojo {
     @Parameter(defaultValue = "${project}", readonly = true, required = true)
     private MavenProject project;
 
-    @Parameter(defaultValue = "japi-compliance-checker.pl -lib NAME %s %s", readonly = true, required = false)
+    @Parameter(defaultValue = "japi-compliance-checker -lib NAME %s %s", readonly = true, required = false)
     private String expression;
 
     @Parameter(defaultValue = "", required = false)
@@ -241,7 +241,7 @@ public class BinaryCompatibilityEnforcerPluginMogo extends AbstractMojo {
         BufferedReader stdError = null;
         try {
 
-            p = new ProcessBuilder("/bin/sh", "-c", "japi-compliance-checker.pl -l").start();
+            p = new ProcessBuilder("/bin/sh", "-c", "japi-compliance-checker -l").start();
             final BufferedReader stdInput = new BufferedReader(new
                     InputStreamReader(p.getInputStream()));
 
