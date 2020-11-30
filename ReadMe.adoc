@@ -2,10 +2,18 @@
 
 This is a maven plugin that wraps - https://github.com/lvc/japi-compliance-checker
 
-This plugin uses the perl scripts of japi-compliance-checker directly. So japi-compliance-checker has to be installed and available on your $PATH.
-
+This plugin uses the perl scripts and components of japi-compliance-checker directly. So japi-compliance-checker has to be installed and available on your $PATH.
 
 NOTE: If this plugin is run on a machine where japi-compliance-checker is not installed. A warning message will be seen, highlighting that the japi-compliance-checker is not available.
+
+
+== The reason we wrote this plugin
+
+To better detect breaking changes of binary compatibility, this plugin enforces, that we only allow breaking changes, when there has been a change to the "MinorVersion”. 
+
+NOTE: The above is assuming the following maven version format : ( see also https://docs.oracle.com/middleware/1212/core/MAVEN/maven_version.htm#MAVEN8855) 
+
+<MajorVersion>.<MinorVersion>.<IncrementalVersion>
 
 = Install
 
