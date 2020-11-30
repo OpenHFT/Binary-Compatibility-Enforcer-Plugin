@@ -99,9 +99,10 @@ These jar will be resolved at runtime of the plugin.
 
 This `expression`, is the expression that is passed directly to japi-compliance-checker.pl, for more information on the options see https://github.com/lvc/japi-compliance-checker, or run:
 
-```
+[source,shell script]
+----
 japi-compliance-checker.pl -help
-````
+----
 
 === Binary Compatibility Percentage Required
 
