@@ -29,14 +29,15 @@ sudo make install prefix=/usr
 
 ==== Mac
 
-=== set the approximate permission
+===== Permissions
 
+set the approximate permission
 [source,shell script]
 ----
 $chmod -R 775 <path>
 ----
 
-=== Path 
+===== Path 
 
 Add the japi-compliance-checker to your path
 
