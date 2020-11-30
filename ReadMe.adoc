@@ -52,7 +52,7 @@ ln -s japi-compliance-checker.pl japi-compliance-checker
 
 Add the japi-compliance-checker to your path
 
-for example on a mac if you have installed it to ~/projects/japi-compliance-checker
+for example on a mac if you have installed it to ~/<path>/japi-compliance-checker
 
 [source,shell script]
 ----
@@ -63,7 +63,7 @@ add the following:
 
 [source,shell script]
 ----
-export PATH="$PATH:~/projects/japi-compliance-checker"
+export PATH="$PATH:~/<path>/japi-compliance-checker"
 ----
 
 = Configuration
