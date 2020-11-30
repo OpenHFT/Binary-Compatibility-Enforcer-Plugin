@@ -15,6 +15,8 @@ NOTE: The above is assuming the following maven version format : ( see also http
 
 <MajorVersion>.<MinorVersion>.<IncrementalVersion>
 
+NOTE: No validation is carried out if the current version is `<x>.<y>.0` or `<x>.<y>.0-SNAPSHOT`
+
 = Install
 
 * JDK or OpenJDK - development files
