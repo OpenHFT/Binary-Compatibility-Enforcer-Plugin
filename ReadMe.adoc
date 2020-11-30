@@ -16,6 +16,18 @@ If this plug in run an a mahine where japi-compliance-checker is not install, no
 * maven
 * Perl 5
 
+=== Install 
+
+$git clone git@github.com:lvc/japi-compliance-checker.git
+$cd japi-compliance-checker/
+
+==== Linxu
+
+```
+sudo make install prefix=/usr
+```
+
+==== Mac
 
 === set the approximate permission
 
