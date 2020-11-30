@@ -11,23 +11,21 @@ If this plug in run an a mahine where japi-compliance-checker is not install, no
 
 = Install
 
-* https://github.com/lvc/japi-compliance-checker#install
 * JDK or OpenJDK - development files
-* maven
+* Maven
 * Perl 5
-
-=== Install 
+* https://github.com/lvc/japi-compliance-checker#install
 
 $git clone git@github.com:lvc/japi-compliance-checker.git
 $cd japi-compliance-checker/
 
-=== Linxu
+== Linxu
 
 ```
 sudo make install prefix=/usr
 ```
 
-=== Mac
+== Mac
 
 === Permissions
 
