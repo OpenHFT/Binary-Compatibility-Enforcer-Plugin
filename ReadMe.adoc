@@ -77,7 +77,7 @@ export PATH="$PATH:~/<path>/japi-compliance-checker"
 | optional
 
 | expression
-| japi-compliance-checker.pl -lib NAME %s %s
+| japi-compliance-checker -lib NAME %s %s
 |
 | optional
 
@@ -95,7 +95,7 @@ Hence if no reference version is provided then the default version is used. The 
 
 === Expression
 
-`japi-compliance-checker.pl -lib NAME %s %s`
+`japi-compliance-checker -lib NAME %s %s`
 the `%s` are the first and second jars:
 
 * first jar  - reference version
@@ -103,16 +103,16 @@ the `%s` are the first and second jars:
 
 These jar will be resolved at runtime of the plugin.
 
-This `expression`, is the expression that is passed directly to japi-compliance-checker.pl, for more information on the options see https://github.com/lvc/japi-compliance-checker, or run:
+This `expression`, is the expression that is passed directly to japi-compliance-checker, for more information on the options see https://github.com/lvc/japi-compliance-checker, or run:
 
 [source,shell script]
 ----
-japi-compliance-checker.pl -help
+japi-compliance-checker -help
 ----
 
 === Binary Compatibility Percentage Required
 
-When the `japi-compliance-checker.pl` is run, it provides the `binary compatibility` as a percentage, if the percentage that is reported is lower than the `binaryCompatibilityPercentageRequired`, the validation will fail and a link will be provided to an html a report. By default the `binaryCompatibilityPercentageRequired` is set to 100%.
+When the `japi-compliance-checker` is run, it provides the `binary compatibility` as a percentage, if the percentage that is reported is lower than the `binaryCompatibilityPercentageRequired`, the validation will fail and a link will be provided to an html a report. By default the `binaryCompatibilityPercentageRequired` is set to 100%.
 
 == Maven
 
@@ -133,7 +133,7 @@ When the `japi-compliance-checker.pl` is run, it provides the `binary compatibil
                 <!-- if not set it will check against the <x>.<y>.0 version -->
                 <referenceVersion>2.20.2</referenceVersion>
 
-                <expression>japi-compliance-checker.pl -lib NAME %s %s</expression>
+                <expression>japi-compliance-checker -lib NAME %s %s</expression>
 
             </configuration>
         </execution>
