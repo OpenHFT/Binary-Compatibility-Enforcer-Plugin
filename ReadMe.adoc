@@ -7,9 +7,9 @@ This plugin uses the perl scripts and components of japi-compliance-checker dire
 NOTE: If this plugin is run on a machine where japi-compliance-checker is not installed. A warning message will be seen, highlighting that the japi-compliance-checker is not available.
 
 
-=== The reason we wrote this plugin
+=== What it does
 
-To better detect breaking changes of binary compatibility, this plugin enforces, that we only allow breaking changes, when there has been a change to the "MinorVersion”. 
+It allows us to better detect breaking changes of binary compatibility, this plugin enforces, that we only allow breaking changes, when there has been a change to the "MinorVersion”. 
 
 NOTE: The above is assuming the following maven version format : ( see also https://docs.oracle.com/middleware/1212/core/MAVEN/maven_version.htm#MAVEN8855) 
 
