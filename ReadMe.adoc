@@ -75,18 +75,27 @@ export PATH="$PATH:~/projects/japi-compliance-checker"
 
 === Reference Version
 
-The reference version my either be provided or available as the <x>.<y>.0 version, for example assume that you where on 5.20.143-SNAPSHOT then this would be checked ( by default ) against 5.20.0 but only if this version exists.
+If you specify a reference version this will be used instead of the default reference version. If the reference version you provide is not availible in maven central, an error will be reported. 
+Hence if no reference version is provided then the default version is used. The default version is <x>.<y>.0 version, for example assume that you where on 5.20.143-SNAPSHOT then this would be checked ( by default ) against 5.20.0, If 5.20.0 does not exist in maven central, then an error will be reported.
 
-=== expression
+=== Expression
 
 `japi-compliance-checker.pl -lib NAME %s %s`
-the %s are the first and second jars, these jar will be filled in by this plugin at runtime.
+the %s are the first and second jars, 
+* first jar - reference version
+* second jar - current project version
 
-This is the expression that is passed directly to japi-compliance-checker.pl, for more information on the options see https://github.com/lvc/japi-compliance-checker
+These jar will be resolved at runtime of the plugin.
 
-=== binaryCompatibilityPercentageRequired
+This `expression`, is the expression that is passed directly to japi-compliance-checker.pl, for more information on the options see https://github.com/lvc/japi-compliance-checker, or run:
 
-when the `japi-compliance-checker.pl` is run, it provides a value for `binary compatibility` if the value that is reported is lower than the value you set, this enforcer plugin will fail the validation as produce a local link to the html a report.
+```
+japi-compliance-checker.pl -help
+````
+
+=== Binary Compatibility Percentage Required
+
+When the `japi-compliance-checker.pl` is run, it provides the `binary compatibility` as a percentage, if the percentage that is reported is lower than the percentage you set, the validation will fail and a link will be provided to an html a report. By default this is set to 100%.
 
 == Maven
 
