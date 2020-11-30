@@ -1,4 +1,4 @@
-== Overview
+= Overview
 
 This is a maven plugin that wraps - https://github.com/lvc/japi-compliance-checker
 
@@ -9,7 +9,7 @@ This plugin uses the perl scripts of japi-compliance-checker directly. So japi-c
 If this plug in run an a mahine where japi-compliance-checker is not install, no action will be taken. The build will not failed.
 
 
-== Install
+= Install
 
 * https://github.com/lvc/japi-compliance-checker#install
 * JDK or OpenJDK - development files
@@ -21,15 +21,15 @@ If this plug in run an a mahine where japi-compliance-checker is not install, no
 $git clone git@github.com:lvc/japi-compliance-checker.git
 $cd japi-compliance-checker/
 
-==== Linxu
+=== Linxu
 
 ```
 sudo make install prefix=/usr
 ```
 
-==== Mac
+=== Mac
 
-===== Permissions
+=== Permissions
 
 set the approximate permission
 [source,shell script]
@@ -37,7 +37,7 @@ set the approximate permission
 $chmod -R 775 <path>
 ----
 
-===== Path 
+=== Path 
 
 Add the japi-compliance-checker to your path
 
@@ -55,7 +55,7 @@ add the following:
 export PATH="$PATH:~/projects/japi-compliance-checker"
 ----
 
-== Configuration
+= Configuration
 
 |===
 | parameter  | default value | Example | Required / Optional
