@@ -9,7 +9,7 @@ NOTE: If this plugin is run on a machine where japi-compliance-checker is not in
 
 === What it does
 
-It allows us to better detect breaking changes of binary compatibility, this plugin enforces, that we only allow breaking changes, when there has been a change to the "MinorVersion”. 
+It allows us to better detect breaking changes of binary compatibility, this plugin enforces, that we only allow these changes, when there has been a change to the "MinorVersion”. 
 
 The above is assuming the following maven version format : ( see also https://docs.oracle.com/middleware/1212/core/MAVEN/maven_version.htm#MAVEN8855) 
 
