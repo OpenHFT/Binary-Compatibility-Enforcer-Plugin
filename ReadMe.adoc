@@ -107,7 +107,7 @@ japi-compliance-checker.pl -help
 
 === Binary Compatibility Percentage Required
 
-When the `japi-compliance-checker.pl` is run, it provides the `binary compatibility` as a percentage, if the percentage that is reported is lower than the percentage you set, the validation will fail and a link will be provided to an html a report. By default this is set to 100%.
+When the `japi-compliance-checker.pl` is run, it provides the `binary compatibility` as a percentage, if the percentage that is reported is lower than the `binaryCompatibilityPercentageRequired`, the validation will fail and a link will be provided to an html a report. By default this is set to 100%.
 
 == Maven
 
