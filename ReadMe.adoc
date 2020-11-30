@@ -91,8 +91,9 @@ Hence if no reference version is provided then the default version is used. The 
 === Expression
 
 `japi-compliance-checker.pl -lib NAME %s %s`
-the %s are the first and second jars, 
-* first jar - reference version
+the %s are the first and second jars:
+
+* first jar  - reference version
 * second jar - current project version
 
 These jar will be resolved at runtime of the plugin.
