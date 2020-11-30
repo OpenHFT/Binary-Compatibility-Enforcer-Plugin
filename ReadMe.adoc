@@ -5,9 +5,7 @@ This is a maven plugin that wraps - https://github.com/lvc/japi-compliance-check
 This plugin uses the perl scripts of japi-compliance-checker directly. So japi-compliance-checker has to be installed and available on your $PATH.
 
 
-== NOTE
-If this plug in run an a mahine where japi-compliance-checker is not install, no action will be taken. The build will not failed.
-
+NOTE: If this plugin is run on a machine where japi-compliance-checker is not installed. A warning message will be seen, highlighting that the japi-compliance-checker is not available.
 
 = Install
 
