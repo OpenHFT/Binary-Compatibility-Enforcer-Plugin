@@ -66,14 +66,14 @@ export PATH="$PATH:~/projects/japi-compliance-checker"
 |===
 | parameter  | default value | Example | Required / Optional
 
-| expression
-| japi-compliance-checker.pl -lib NAME %s %s
-|
-| optional
-
 | referenceVersion
 | <x>.<y>.0
 | 5.20.120
+| optional
+
+| expression
+| japi-compliance-checker.pl -lib NAME %s %s
+|
 | optional
 
 | binaryCompatibilityPercentageRequired
