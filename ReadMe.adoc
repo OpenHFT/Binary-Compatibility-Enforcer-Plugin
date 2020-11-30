@@ -42,6 +42,11 @@ set the approximate permission
 ----
 $chmod -R 775 <path>
 ----
+=== Link
+
+```
+ln -s japi-compliance-checker.pl japi-compliance-checker 
+```
 
 === Path 
 
