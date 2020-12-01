@@ -78,7 +78,7 @@ export PATH="$PATH:~/<path>/japi-compliance-checker"
 
 | artifactsURI
 |
-|
+| https://teamcity.chronicle.software/repository/download
 | optional
 
 | expression
