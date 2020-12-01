@@ -143,7 +143,7 @@ When the `japi-compliance-checker` is run, it provides the `binary compatibility
 
 = Teamcity
 
-If you are using teamcity then to enable to the report to hosted as an html by your teamcity server, then set the following
+If you are using teamcity, then to host the report on your teamcity server you should set `**/compat_report.html` in the following ( see example ):
 
 image::teamcity.png[]
 
