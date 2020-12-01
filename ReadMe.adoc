@@ -133,9 +133,7 @@ When the `japi-compliance-checker` is run, it provides the `binary compatibility
                 <!-- the version that it checks against -->
                 <!-- if not set it will check against the <x>.<y>.0 version -->
                 <referenceVersion>2.20.2</referenceVersion>
-
                 <expression>japi-compliance-checker -lib NAME %s %s</expression>
-
             </configuration>
         </execution>
     </executions>
