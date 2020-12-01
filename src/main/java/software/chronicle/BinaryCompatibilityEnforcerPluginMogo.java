@@ -41,6 +41,7 @@ public class BinaryCompatibilityEnforcerPluginMogo extends AbstractMojo {
     @Parameter(defaultValue = "100.0", required = false)
     double binaryCompatibilityPercentageRequired;
 
+
     public void execute() throws MojoExecutionException {
 
         getLog().info(format("%s\nBINARY COMPATIBILITY ENFORCER - %s%s", BAR, project.getArtifactId(), BAR));
@@ -171,7 +172,7 @@ public class BinaryCompatibilityEnforcerPluginMogo extends AbstractMojo {
 
 
     private void checkBinaryCompatibility(final String jar1, final String jar2, final String artifactName) throws MojoExecutionException {
-        getLog().info("getenv=" + System.getenv());
+        getLog().info("getProperties=" + System.getProperties());
 
         BufferedReader stdError = null;
         Process p = null;
