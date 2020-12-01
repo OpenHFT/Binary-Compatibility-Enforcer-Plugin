@@ -41,7 +41,7 @@ public class BinaryCompatibilityEnforcerPluginMogo extends AbstractMojo {
 
     public void execute() throws MojoExecutionException {
 
-        getLog().info(format("%s\nBINARY COMPATIBILITY ENFORCER - %s\n%s", BAR, project.getArtifactId(), BAR));
+        getLog().info(format("%sBINARY COMPATIBILITY ENFORCER - %s%s", BAR, project.getArtifactId(), BAR));
 
         getLog().info("Starting...");
 
