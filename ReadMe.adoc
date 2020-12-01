@@ -145,6 +145,40 @@ When the `japi-compliance-checker` is run, it provides the `binary compatibility
 
 If you are using teamcity then to enable to the report to hosted as an html by your teamcity server, then set the following
 
-image:
+image::teamcity.png[]
+
+and set add the following to your config 
+
+```
+<configuration>
+    <artifactsURI> <!-- YOUR TEAMCITY SERVER URL --> </artifactsURI>
+</configuration>
+```          
+
+for example:
+
+```
+<plugin>
+    <groupId>net.openhft</groupId>
+    <artifactId>binary-compatibility-enforcer-plugin</artifactId>
+    <version>1.0.3</version>
+    <executions>
+        <execution>
+            <phase>verify</phase>
+            <goals>
+                <goal>enforcer</goal>
+            </goals>
+            <configuration>
+                <referenceVersion>1.7.12</referenceVersion>
+                <artifactsURI>https://teamcity.chronicle.software/repository/download</artifactsURI>
+            </configuration>
+        </execution>
+    </executions>
+</plugin>
+```
+            
+
+
+            
 
 
