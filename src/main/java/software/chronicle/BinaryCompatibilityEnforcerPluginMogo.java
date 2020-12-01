@@ -25,6 +25,7 @@ public class BinaryCompatibilityEnforcerPluginMogo extends AbstractMojo {
     public static final String BINARY_COMPATIBILITY = "Binary compatibility: ";
     public static final String BAR = "\n------------------------------" +
             "------------------------------------------";
+    private static final String BIN_SH = "/bin/sh";
 
     @Parameter(defaultValue = "${project}", readonly = true, required = true)
     private MavenProject project;
@@ -45,6 +46,12 @@ public class BinaryCompatibilityEnforcerPluginMogo extends AbstractMojo {
     public void execute() throws MojoExecutionException {
 
         getLog().info(format("%s\nBINARY COMPATIBILITY ENFORCER - %s%s", BAR, project.getArtifactId(), BAR));
+
+        // avoid errors on Windows
+        if (!new File(BIN_SH).exists()) {
+            getLog().info("Not supported on Windows yet");
+            return;
+        }
 
         getLog().info("Starting...");
 
@@ -178,7 +185,7 @@ public class BinaryCompatibilityEnforcerPluginMogo extends AbstractMojo {
             final String command = format(expression, artifactName, jar1, jar2);
 
             getLog().info(command);
-            p = new ProcessBuilder("/bin/sh", "-c", command).start();
+            p = new ProcessBuilder(BIN_SH, "-c", command).start();
 
             final BufferedReader stdInput = new BufferedReader(new
                     InputStreamReader(p.getInputStream()));
@@ -268,7 +275,7 @@ public class BinaryCompatibilityEnforcerPluginMogo extends AbstractMojo {
         BufferedReader stdError = null;
         try {
 
-            p = new ProcessBuilder("/bin/sh", "-c", "japi-compliance-checker -l").start();
+            p = new ProcessBuilder(BIN_SH, "-c", "japi-compliance-checker -l").start();
             final BufferedReader stdInput = new BufferedReader(new
                     InputStreamReader(p.getInputStream()));
 
