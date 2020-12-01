@@ -76,6 +76,11 @@ export PATH="$PATH:~/<path>/japi-compliance-checker"
 | 5.20.120
 | optional
 
+| artifactsURI
+|
+|
+| optional
+
 | expression
 | japi-compliance-checker -lib %s %s %s
 |
@@ -111,6 +116,10 @@ This `expression`, is the expression that is passed directly to japi-compliance-
 japi-compliance-checker -help
 ----
 
+=== ArtifactsURI
+
+Used to host the error report on a teamcity server, see section below on Teamcity.
+
 === Binary Compatibility Percentage Required
 
 When the `japi-compliance-checker` is run, it provides the `binary compatibility` as a percentage, if the percentage that is reported is lower than the `binaryCompatibilityPercentageRequired`, the validation will fail and a link will be provided to an html a report. By default the `binaryCompatibilityPercentageRequired` is set to 100%.
@@ -141,7 +150,7 @@ When the `japi-compliance-checker` is run, it provides the `binary compatibility
 ----
 
 
-= Teamcity
+== Teamcity
 
 If you are using teamcity, then to host the report on your teamcity server you should set `**/compat_report.html` in the following ( see example ):
 
