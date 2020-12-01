@@ -29,7 +29,7 @@ public class BinaryCompatibilityEnforcerPluginMogo extends AbstractMojo {
     @Parameter(defaultValue = "${project}", readonly = true, required = true)
     private MavenProject project;
 
-    @Parameter(defaultValue = "japi-compliance-checker -lib NAME %s %s", readonly = true, required = false)
+    @Parameter(defaultValue = "japi-compliance-checker -lib %s %s %s", readonly = true, required = false)
     private String expression;
 
     @Parameter(defaultValue = "", required = false)
@@ -41,7 +41,7 @@ public class BinaryCompatibilityEnforcerPluginMogo extends AbstractMojo {
 
     public void execute() throws MojoExecutionException {
 
-        getLog().info(String.format("%s\nBINARY COMPATIBILITY ENFORCER\n%s", BAR, BAR));
+        getLog().info(format("%s\nBINARY COMPATIBILITY ENFORCER\n%s", BAR, BAR));
 
         getLog().info("Starting...");
 
@@ -77,13 +77,13 @@ public class BinaryCompatibilityEnforcerPluginMogo extends AbstractMojo {
         if (finalName.endsWith("0-SNAPSHOT.jar") || finalName.endsWith("0.jar"))
             return;
 
-        checkBinaryCompatibility(pathToJar1, pathToJar2);
+        checkBinaryCompatibility(pathToJar1, pathToJar2, artifactId);
     }
 
     private String referencePath(final String groupId,
                                  final String artifactId,
                                  final String outputDirectory) throws MojoExecutionException {
-        String pathToJar1 =null;
+        String pathToJar1 = null;
         if (referenceVersion == null || referenceVersion.isEmpty()) {
 
             String version = project.getVersion();
@@ -100,7 +100,8 @@ public class BinaryCompatibilityEnforcerPluginMogo extends AbstractMojo {
                                 referenceVersion,
                                 outputDirectory).getAbsolutePath();
                     } catch (final Exception e) {
-                        throw new MojoExecutionException("Please set <referenceVersion> config, can not download default version=" + referenceVersion + " of " + artifactId, e);
+                        throw new MojoExecutionException(String.format("Please set <referenceVersion> config, " +
+                                "can not download default version=%s of %s", referenceVersion, artifactId), e);
                     }
 
                 }
@@ -127,7 +128,8 @@ public class BinaryCompatibilityEnforcerPluginMogo extends AbstractMojo {
     private File downloadArtifact(final String group, final String artifactId, final String version, final String target) throws MojoExecutionException {
         final File tempFile = new File(target, artifactId + "-" + version + ".jar");
         tempFile.delete();
-        final String command = String.format("mvn dependency:get -Dartifact=%s:%s:%s:jar -Dtransitive=false -Ddest=%s -DremoteRepositories=chronicle-enterprise-release::::https://nexus.chronicle.software/content/repositories/releases ", group, artifactId, version, tempFile);
+        //   final String command = format("mvn dependency:get -Dartifact=%s:%s:%s:jar -Dtransitive=false -Ddest=%s -DremoteRepositories=chronicle-enterprise-release::::https://nexus.chronicle.software/content/repositories/releases ", group, artifactId, version, tempFile);
+        final String command = format("mvn dependency:get -Dartifact=%s:%s:%s:jar -Dtransitive=false -Ddest=%s", group, artifactId, version, tempFile);
 
         getLog().info(command);
 
@@ -166,12 +168,12 @@ public class BinaryCompatibilityEnforcerPluginMogo extends AbstractMojo {
     }
 
 
-    public void checkBinaryCompatibility(final String jar1, final String jar2) throws MojoExecutionException {
+    private void checkBinaryCompatibility(final String jar1, final String jar2, final String artifactName) throws MojoExecutionException {
 
         BufferedReader stdError = null;
         Process p = null;
         try {
-            final String command = format(expression, jar1, jar2);
+            final String command = format(expression, artifactName, jar1, jar2);
 
             getLog().debug("command=" + command);
             p = new ProcessBuilder("/bin/sh", "-c", command).start();
@@ -203,12 +205,22 @@ public class BinaryCompatibilityEnforcerPluginMogo extends AbstractMojo {
 
                 if (parseDouble(binaryCompatibility) < binaryCompatibilityPercentageRequired) {
 
-                    throw new MojoExecutionException("\n" + BAR + "BINARY COMPATIBILITY ENFORCER - FAILURE: " + binaryCompatibility + "%  binary compatibility\nYour changes are only " +
-                            binaryCompatibility + "% binary compatibility, this enforcer plugin requires at least " + binaryCompatibilityPercentageRequired + "% binary compatibility,\n between " + jar1 + " and " + jar2 + "\nsee report \"file://" + new File(report).getAbsolutePath() + "\"" + BAR);
+                    throw new MojoExecutionException(format("\n%sBINARY COMPATIBILITY ENFORCER - FAILURE - %s: %s%%  binary compatibility\n" +
+                                    "Your changes are only %s%% binary compatibility, this enforcer plugin requires at least %s%% binary compatibility,\n " +
+                                    "between %s and %s\nsee report \"file://%s\"%s",
+                            BAR,
+                            artifactName,
+                            binaryCompatibility,
+                            binaryCompatibility,
+                            binaryCompatibilityPercentageRequired,
+                            jar1,
+                            jar2,
+                            new File(report).getAbsolutePath(),
+                            BAR));
 
                 } else
-                    getLog().info(String.format("Whilst checking against %s", jar1));
-                getLog().info(String.format("%sBINARY COMPATIBILITY ENFORCER - SUCCESSFUL%s", BAR, BAR));
+                    getLog().info(format("Whilst checking against %s", jar1));
+                getLog().info(format("%sBINARY COMPATIBILITY ENFORCER - SUCCESSFUL - %s%s", BAR, artifactName, BAR));
                 return;
 
             }
