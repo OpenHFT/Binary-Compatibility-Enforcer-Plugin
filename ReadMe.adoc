@@ -176,6 +176,11 @@ for example:
     </executions>
 </plugin>
 ```
+for example like this
+
+image::html-report.png[]
+
+NOTE: If you set `artifactsURI` and you are not running on teamcity this setting will be ignored.
             
 
 
