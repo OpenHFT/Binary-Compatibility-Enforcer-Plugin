@@ -24,7 +24,7 @@ public class BinaryCompatibilityEnforcerPluginMogo extends AbstractMojo {
     public static final String REPORT = "Report: ";
     public static final String BINARY_COMPATIBILITY = "Binary compatibility: ";
     public static final String BAR = "\n------------------------------" +
-            "------------------------------------------\n";
+            "------------------------------------------";
 
     @Parameter(defaultValue = "${project}", readonly = true, required = true)
     private MavenProject project;
@@ -41,7 +41,7 @@ public class BinaryCompatibilityEnforcerPluginMogo extends AbstractMojo {
 
     public void execute() throws MojoExecutionException {
 
-        getLog().info(format("%sBINARY COMPATIBILITY ENFORCER - %s%s", BAR, project.getArtifactId(), BAR));
+        getLog().info(format("%s\nBINARY COMPATIBILITY ENFORCER - %s%s", BAR, project.getArtifactId(), BAR));
 
         getLog().info("Starting...");
 
@@ -205,7 +205,7 @@ public class BinaryCompatibilityEnforcerPluginMogo extends AbstractMojo {
 
                 if (parseDouble(binaryCompatibility) < binaryCompatibilityPercentageRequired) {
 
-                    throw new MojoExecutionException(format("\n%sBINARY COMPATIBILITY ENFORCER - FAILURE - %s: %s%%  binary compatibility\n" +
+                    throw new MojoExecutionException(format("\n%s\nBINARY COMPATIBILITY ENFORCER - FAILURE - %s: %s%%  binary compatibility\n" +
                                     "Your changes are only %s%% binary compatibility, this enforcer plugin requires at least %s%% binary compatibility,\n " +
                                     "between %s and %s\nsee report \"file://%s\"%s",
                             BAR,
@@ -220,7 +220,7 @@ public class BinaryCompatibilityEnforcerPluginMogo extends AbstractMojo {
 
                 } else
                     getLog().info(format("Whilst checking against %s", jar1));
-                getLog().info(format("%sBINARY COMPATIBILITY ENFORCER - SUCCESSFUL - %s%s", BAR, artifactName, BAR));
+                getLog().info(format("%s\nBINARY COMPATIBILITY ENFORCER - SUCCESSFUL - %s%s", BAR, artifactName, BAR));
                 return;
 
             }
