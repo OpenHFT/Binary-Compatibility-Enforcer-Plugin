@@ -35,9 +35,11 @@ public class BinaryCompatibilityEnforcerPluginMogo extends AbstractMojo {
     @Parameter(defaultValue = "", required = false)
     private String referenceVersion;
 
+    @Parameter(defaultValue = "https://teamcity.chronicle.software/repository/download", required = false)
+    private String artifactsURL;
+
     @Parameter(defaultValue = "100.0", required = false)
     double binaryCompatibilityPercentageRequired;
-
 
     public void execute() throws MojoExecutionException {
 
@@ -84,7 +86,7 @@ public class BinaryCompatibilityEnforcerPluginMogo extends AbstractMojo {
                                  final String artifactId,
                                  final String outputDirectory) throws MojoExecutionException {
         String pathToJar1 = null;
-        if (referenceVersion == null || referenceVersion.isEmpty()) {
+        if (isEmpty(referenceVersion)) {
 
             String version = project.getVersion();
             int i = version.indexOf(".");
@@ -169,6 +171,7 @@ public class BinaryCompatibilityEnforcerPluginMogo extends AbstractMojo {
 
 
     private void checkBinaryCompatibility(final String jar1, final String jar2, final String artifactName) throws MojoExecutionException {
+        getLog().info("getenv=" + System.getenv());
 
         BufferedReader stdError = null;
         Process p = null;
@@ -203,11 +206,17 @@ public class BinaryCompatibilityEnforcerPluginMogo extends AbstractMojo {
 
                 final String report = s1.substring(REPORT.length());
 
+
                 if (parseDouble(binaryCompatibility) < binaryCompatibilityPercentageRequired) {
+
+                    final String buildNumber = System.getenv("BUILD_NUMBER");
+                    final String uri = buildNumber == null || isEmpty(artifactsURL)
+                            ? "file://" + new File(report).getAbsolutePath()
+                            : String.format("http://%s/%s:id/%s", artifactsURL, buildNumber, report);
 
                     throw new MojoExecutionException(format("\n%s\nBINARY COMPATIBILITY ENFORCER - FAILURE - %s: %s%%  binary compatibility\n" +
                                     "Your changes are only %s%% binary compatibility, this enforcer plugin requires at least %s%% binary compatibility,\n " +
-                                    "between %s and %s\nsee report \"file://%s\"%s",
+                                    "between %s and %s\nsee report \"%s\"%s",
                             BAR,
                             artifactName,
                             binaryCompatibility,
@@ -215,11 +224,12 @@ public class BinaryCompatibilityEnforcerPluginMogo extends AbstractMojo {
                             binaryCompatibilityPercentageRequired,
                             jar1,
                             jar2,
-                            new File(report).getAbsolutePath(),
+                            uri,
                             BAR));
 
                 } else
                     getLog().info(format("Whilst checking against %s", jar1));
+
                 getLog().info(format("%s\nBINARY COMPATIBILITY ENFORCER - SUCCESSFUL - %s%s", BAR, artifactName, BAR));
                 return;
 
@@ -233,6 +243,10 @@ public class BinaryCompatibilityEnforcerPluginMogo extends AbstractMojo {
             shutdown(p);
 
         }
+    }
+
+    private boolean isEmpty(String value) {
+        return value == null || value.isEmpty();
     }
 
     private void dumpErrorToConsole(final BufferedReader std) throws MojoExecutionException {
