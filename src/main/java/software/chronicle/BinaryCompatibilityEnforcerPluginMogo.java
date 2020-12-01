@@ -41,7 +41,7 @@ public class BinaryCompatibilityEnforcerPluginMogo extends AbstractMojo {
 
     public void execute() throws MojoExecutionException {
 
-        getLog().info(format("%s\nBINARY COMPATIBILITY ENFORCER\n%s", BAR, BAR));
+        getLog().info(format("%s\nBINARY COMPATIBILITY ENFORCER - %s\n%s", BAR, project.getArtifactId(), BAR));
 
         getLog().info("Starting...");
 
@@ -175,7 +175,7 @@ public class BinaryCompatibilityEnforcerPluginMogo extends AbstractMojo {
         try {
             final String command = format(expression, artifactName, jar1, jar2);
 
-            getLog().debug("command=" + command);
+            getLog().info(command);
             p = new ProcessBuilder("/bin/sh", "-c", command).start();
 
             final BufferedReader stdInput = new BufferedReader(new
