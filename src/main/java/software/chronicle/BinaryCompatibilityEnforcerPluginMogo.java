@@ -35,8 +35,8 @@ public class BinaryCompatibilityEnforcerPluginMogo extends AbstractMojo {
     @Parameter(defaultValue = "", required = false)
     private String referenceVersion;
 
-    @Parameter(defaultValue = "https://teamcity.chronicle.software/repository/download", required = false)
-    private String artifactsURL;
+    @Parameter(defaultValue = "", required = false)
+    private String artifactsURI;
 
     @Parameter(defaultValue = "100.0", required = false)
     double binaryCompatibilityPercentageRequired;
@@ -222,9 +222,9 @@ public class BinaryCompatibilityEnforcerPluginMogo extends AbstractMojo {
                     final String buildNumber = System.getProperty("teamcity.agent.dotnet.build_id");
                     final String buildTypeId = System.getProperty("teamcity.buildType.id");
 
-                    final String uri = buildNumber == null || isEmpty(artifactsURL) || isEmpty(buildTypeId)
+                    final String uri = buildNumber == null || isEmpty(artifactsURI) || isEmpty(buildTypeId)
                             ? "file://" + new File(report).getAbsolutePath()
-                            : String.format("%s/%s/%s/%s", artifactsURL, buildTypeId, buildNumber + ":id", report);
+                            : String.format("%s/%s/%s/%s", artifactsURI, buildTypeId, buildNumber + ":id", report);
 
                     throw new MojoExecutionException(format("\n%s\nBINARY COMPATIBILITY ENFORCER - FAILURE - %s: %s%%  binary compatibility\n" +
                                     "Your changes are only %s%% binary compatibility, this enforcer plugin requires at least %s%% binary compatibility,\n " +
