@@ -82,12 +82,17 @@ export PATH="$PATH:~/<path>/japi-compliance-checker"
 | optional
 
 | expression
-| japi-compliance-checker -lib %s %s %s
+| japi-compliance-checker -lib %s %s %s -report-path %s
 |
 | optional
 
 | binaryCompatibilityPercentageRequired
 | 100
+|
+| optional
+
+| reportLocation
+| target
 |
 | optional
 

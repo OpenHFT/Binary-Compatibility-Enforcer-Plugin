@@ -30,7 +30,7 @@ public class BinaryCompatibilityEnforcerPluginMogo extends AbstractMojo {
     @Parameter(defaultValue = "${project}", readonly = true, required = true)
     private MavenProject project;
 
-    @Parameter(defaultValue = "japi-compliance-checker -lib %s %s %s", readonly = true, required = false)
+    @Parameter(defaultValue = "japi-compliance-checker -lib %s %s %s -report-path %s", readonly = true, required = false)
     private String expression;
 
     @Parameter(defaultValue = "", required = false)
@@ -41,6 +41,9 @@ public class BinaryCompatibilityEnforcerPluginMogo extends AbstractMojo {
 
     @Parameter(defaultValue = "100.0", required = false)
     double binaryCompatibilityPercentageRequired;
+
+    @Parameter(defaultValue = "target")
+    private String reportLocation;
 
 
     public void execute() throws MojoExecutionException {
@@ -182,7 +185,8 @@ public class BinaryCompatibilityEnforcerPluginMogo extends AbstractMojo {
         BufferedReader stdError = null;
         Process p = null;
         try {
-            final String command = format(expression, artifactName, jar1, jar2);
+            final String reportOutput = constructReportOutputPath(artifactName, referenceVersion, project.getVersion());
+            final String command = format(expression, artifactName, jar1, jar2, reportOutput);
 
             getLog().info(command);
             p = new ProcessBuilder(BIN_SH, "-c", command).start();
@@ -296,6 +300,10 @@ public class BinaryCompatibilityEnforcerPluginMogo extends AbstractMojo {
         } finally {
             shutdown(p);
         }
+    }
+
+    private String constructReportOutputPath(String artifactName, String oldVersion, String newVersion) {
+        return format("%s/compat_reports/%s/%s_to_%s/compat_report.html", reportLocation, artifactName, oldVersion, newVersion);
     }
 
     private void shutdown(final Process p) {
