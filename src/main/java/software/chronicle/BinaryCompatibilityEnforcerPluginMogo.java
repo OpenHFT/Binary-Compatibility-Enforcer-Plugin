@@ -303,7 +303,7 @@ public class BinaryCompatibilityEnforcerPluginMogo extends AbstractMojo {
     }
 
     private String constructReportOutputPath(String artifactName, String oldVersion, String newVersion) {
-        return format("%s/compat_reports/%s/%s_to_%s/compat_report.html", reportLocation, artifactName, oldVersion, newVersion);
+        return project.getBasedir().getAbsolutePath() + format("/%s/compat_reports/%s/%s_to_%s/compat_report.html", reportLocation, artifactName, oldVersion, newVersion);
     }
 
     private void shutdown(final Process p) {
