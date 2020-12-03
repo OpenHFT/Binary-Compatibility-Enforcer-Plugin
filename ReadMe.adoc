@@ -1,5 +1,6 @@
 = Overview
 
+
 This is a maven plugin that wraps - https://github.com/lvc/japi-compliance-checker
 
 This plugin uses the perl scripts and components of japi-compliance-checker directly. So japi-compliance-checker has to be installed and available on your $PATH.
@@ -16,6 +17,15 @@ The above is assuming the following maven version format : ( see also https://do
 <MajorVersion>.<MinorVersion>.<IncrementalVersion>
 
 NOTE: No validation is carried out if the current version is `<x>.<y>.0` or `<x>.<y>.0-SNAPSHOT`
+
+= OS supported
+
+* Mac
+* Linux
+
+Not supported yet
+
+* Windows
 
 = Install
 
