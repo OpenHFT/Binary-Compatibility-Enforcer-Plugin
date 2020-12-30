@@ -87,7 +87,8 @@ public class BinaryCompatibilityEnforcerPluginMogo extends AbstractMojo {
 
         getLog().debug("pathToJar2=" + pathToJar2);
 
-        if (finalName.endsWith("0-SNAPSHOT.jar") || finalName.endsWith("0.jar"))
+        if (finalName.endsWith(".0-SNAPSHOT") || finalName.endsWith(".0")
+                || finalName.endsWith("ea0-SNAPSHOT") || finalName.endsWith("ea0"))
             return;
 
         checkBinaryCompatibility(pathToJar1, pathToJar2, artifactId);
