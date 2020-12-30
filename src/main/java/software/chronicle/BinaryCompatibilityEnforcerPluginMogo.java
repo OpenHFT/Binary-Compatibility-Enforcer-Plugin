@@ -48,6 +48,7 @@ public class BinaryCompatibilityEnforcerPluginMogo extends AbstractMojo {
 
     public void execute() throws MojoExecutionException {
 
+
         getLog().info(format("%s\nBINARY COMPATIBILITY ENFORCER - %s%s", BAR, project.getArtifactId(), BAR));
 
         // avoid errors on Windows
@@ -58,12 +59,18 @@ public class BinaryCompatibilityEnforcerPluginMogo extends AbstractMojo {
 
         getLog().info("Starting...");
 
+        final String finalName = project.getBuild().getFinalName();
+        if (finalName.endsWith(".0-SNAPSHOT") || finalName.endsWith(".0")
+                || finalName.endsWith("ea0-SNAPSHOT") || finalName.endsWith("ea0"))
+            return;
+        
         try {
             checkJavaAPIComplianceCheckerInstalled();
         } catch (final MojoExecutionException e) {
             getLog().warn(e.getMessage(), e);
             return;
         }
+
 
         final Build build = project.getBuild();
         if (build == null) {
@@ -82,14 +89,11 @@ public class BinaryCompatibilityEnforcerPluginMogo extends AbstractMojo {
 
         final String directory = build.getDirectory();
 
-        final String finalName = project.getBuild().getFinalName();
+
         final String pathToJar2 = format("%s%s%s.jar", directory, File.separator, finalName);
 
         getLog().debug("pathToJar2=" + pathToJar2);
 
-        if (finalName.endsWith(".0-SNAPSHOT") || finalName.endsWith(".0")
-                || finalName.endsWith("ea0-SNAPSHOT") || finalName.endsWith("ea0"))
-            return;
 
         checkBinaryCompatibility(pathToJar1, pathToJar2, artifactId);
     }
