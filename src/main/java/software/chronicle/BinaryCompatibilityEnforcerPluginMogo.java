@@ -63,7 +63,7 @@ public class BinaryCompatibilityEnforcerPluginMogo extends AbstractMojo {
         if (finalName.endsWith(".0-SNAPSHOT") || finalName.endsWith(".0")
                 || finalName.endsWith("ea0-SNAPSHOT") || finalName.endsWith("ea0"))
             return;
-        
+
         try {
             checkJavaAPIComplianceCheckerInstalled();
         } catch (final MojoExecutionException e) {
@@ -107,25 +107,24 @@ public class BinaryCompatibilityEnforcerPluginMogo extends AbstractMojo {
             String version = project.getVersion();
             int i = version.indexOf(".");
             if (i != -1) {
-                i = version.indexOf(".", i + 1);
-                if (i != -1) {
-                    version = version.substring(0, i);
-                    referenceVersion = version + ".0";
-                    getLog().info("setting referenceVersion=" + referenceVersion);
-                    try {
-                        pathToJar1 = downloadArtifact(groupId,
-                                artifactId,
-                                referenceVersion,
-                                outputDirectory).getAbsolutePath();
-                    } catch (final Exception e) {
-                        throw new MojoExecutionException(String.format("Please set <referenceVersion> config, " +
-                                "can not download default version=%s of %s", referenceVersion, artifactId), e);
-                    }
 
-                }
 
+                referenceVersion = calculateDefaultRefVersion(version, i);
+                getLog().info("setting referenceVersion=" + referenceVersion);
                 if (pathToJar1 == null)
                     throw new MojoExecutionException("Please set <referenceVersion> config");
+
+                try {
+                    pathToJar1 = downloadArtifact(groupId,
+                            artifactId,
+                            referenceVersion,
+                            outputDirectory).getAbsolutePath();
+
+                } catch (final Exception e) {
+                    throw new MojoExecutionException(String.format("Please set <referenceVersion> config, " +
+                            "can not download default version=%s of %s", referenceVersion, artifactId), e);
+                }
+
             } else {
 
                 pathToJar1 = downloadArtifact(groupId,
@@ -140,6 +139,21 @@ public class BinaryCompatibilityEnforcerPluginMogo extends AbstractMojo {
                     referenceVersion,
                     outputDirectory).getAbsolutePath();
         return pathToJar1;
+    }
+
+
+    static String calculateDefaultRefVersion(String version, int indexOfFirstDot) throws MojoExecutionException {
+
+        boolean containsES = version.contains("ea");
+
+        int indexOfSecondDelimitor = version.indexOf(containsES ? "ea" : ".", indexOfFirstDot + 1);
+        if (indexOfSecondDelimitor != -1) {
+            version = version.substring(0, indexOfSecondDelimitor);
+            return containsES ? version + "ea0" : version + ".0";
+        }
+
+        throw new MojoExecutionException(String.format("Please set <referenceVersion> config, " +
+                "can not download default version=%s", version));
     }
 
 
