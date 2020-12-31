@@ -15,17 +15,22 @@ import java.io.InputStreamReader;
 import java.util.concurrent.TimeUnit;
 
 import static java.lang.Double.parseDouble;
-import static java.lang.Runtime.getRuntime;
+
 import static java.lang.String.format;
 
 @Mojo(name = "enforcer", defaultPhase = LifecyclePhase.VERIFY)
 public class BinaryCompatibilityEnforcerPluginMogo extends AbstractMojo {
+    private static final String OS = System.getProperty("os.name").toLowerCase();
+    private static final boolean IS_LINUX = OS.startsWith("linux");
+    private static final boolean IS_MAC = OS.contains("mac");
+    private static final boolean IS_WIN = OS.startsWith("win");
 
     public static final String REPORT = "Report: ";
     public static final String BINARY_COMPATIBILITY = "Binary compatibility: ";
     public static final String BAR = "\n------------------------------" +
             "------------------------------------------";
     private static final String BIN_SH = "/bin/sh";
+    private static final String CMD_EXE = "C:\\WINDOWS\\system32\\cmd.exe";
 
     @Parameter(defaultValue = "${project}", readonly = true, required = true)
     private MavenProject project;
@@ -51,9 +56,12 @@ public class BinaryCompatibilityEnforcerPluginMogo extends AbstractMojo {
 
         getLog().info(format("%s\nBINARY COMPATIBILITY ENFORCER - %s%s", BAR, project.getArtifactId(), BAR));
 
-        // avoid errors on Windows
-        if (!new File(BIN_SH).exists()) {
-            getLog().info("Not supported on Windows yet");
+
+        if ((IS_LINUX | IS_MAC) && !new File(BIN_SH).exists()) {
+            getLog().info(BIN_SH + " not found");
+            return;
+        } else if (IS_WIN && !new File(CMD_EXE).exists()) {
+            getLog().info(CMD_EXE + " not found");
             return;
         }
 
@@ -168,7 +176,8 @@ public class BinaryCompatibilityEnforcerPluginMogo extends AbstractMojo {
         BufferedReader stdError = null;
         Process p = null;
         try {
-            p = getRuntime().exec(command);
+
+            p = new ProcessBuilder(IS_WIN ? CMD_EXE : BIN_SH, IS_WIN ? "/C" : "-c", command).start();
 
             final BufferedReader stdInput = new BufferedReader(new
                     InputStreamReader(p.getInputStream()));
@@ -208,7 +217,7 @@ public class BinaryCompatibilityEnforcerPluginMogo extends AbstractMojo {
             final String command = format(expression, artifactName, jar1, jar2, reportOutput);
 
             getLog().info(command);
-            p = new ProcessBuilder(BIN_SH, "-c", command).start();
+            p = new ProcessBuilder(IS_WIN ? CMD_EXE : BIN_SH, IS_WIN ? "/C" : "-c", command).start();
 
             final BufferedReader stdInput = new BufferedReader(new
                     InputStreamReader(p.getInputStream()));
@@ -298,7 +307,8 @@ public class BinaryCompatibilityEnforcerPluginMogo extends AbstractMojo {
         BufferedReader stdError = null;
         try {
 
-            p = new ProcessBuilder(BIN_SH, "-c", "japi-compliance-checker -l").start();
+            p = new ProcessBuilder(IS_WIN ? CMD_EXE : BIN_SH, IS_WIN ? "/C" : "-c", "japi-compliance-checker -l").start();
+
             final BufferedReader stdInput = new BufferedReader(new
                     InputStreamReader(p.getInputStream()));
 

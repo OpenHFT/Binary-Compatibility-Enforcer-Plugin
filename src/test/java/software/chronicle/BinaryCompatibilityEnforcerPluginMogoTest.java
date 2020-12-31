@@ -19,7 +19,6 @@ public class BinaryCompatibilityEnforcerPluginMogoTest {
 
         assertEquals("1.2ea0", test("1.2ea3"));
         assertEquals("1.2ea0", test("1.2ea4-SNAPSHOT"));
-
     }
 
     private String test(String version) throws MojoExecutionException {
