@@ -31,6 +31,7 @@ public class BinaryCompatibilityEnforcerPluginMogo extends AbstractMojo {
             "------------------------------------------";
     private static final String BIN_SH = "/bin/sh";
     private static final String CMD_EXE = "C:\\WINDOWS\\system32\\cmd.exe";
+    private static final boolean DISABLED = System.getProperty("skip.binary") != null;
 
     @Parameter(defaultValue = "${project}", readonly = true, required = true)
     private MavenProject project;
@@ -53,6 +54,10 @@ public class BinaryCompatibilityEnforcerPluginMogo extends AbstractMojo {
 
     public void execute() throws MojoExecutionException {
 
+        if (DISABLED) {
+            getLog().info(format("%s\nBINARY COMPATIBILITY ENFORCER - %s%s - disabled", BAR, project.getArtifactId(), BAR));
+            return;
+        }
 
         getLog().info(format("%s\nBINARY COMPATIBILITY ENFORCER - %s%s", BAR, project.getArtifactId(), BAR));
 
