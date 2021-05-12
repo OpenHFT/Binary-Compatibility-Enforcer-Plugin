@@ -12,7 +12,7 @@
 
     <artifactId>binary-compatibility-enforcer-plugin</artifactId>
     <packaging>maven-plugin</packaging>
-    <version>1.0.8-SNAPSHOT</version>
+    <version>1.0.8</version>
 
     <build>
         <plugins>
@@ -79,7 +79,7 @@
         <url>scm:git:git@github.com:OpenHFT/Binary-Compatibility-Enforcer-Plugin.git</url>
         <connection>scm:git:git@github.com:OpenHFT/Binary-Compatibility-Enforcer-Plugin.git</connection>
         <developerConnection>scm:git:git@github.com:OpenHFT/Binary-Compatibility-Enforcer-Plugin.git</developerConnection>
-        <tag>master</tag>
+        <tag>binary-compatibility-enforcer-plugin-1.0.8</tag>
     </scm>
 
 </project>
