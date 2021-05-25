@@ -169,7 +169,7 @@ When the `japi-compliance-checker` is run, it provides the `binary compatibility
 
 If you are using teamcity, then to host the report on your teamcity server you should set `**/compat_report.html` in the following ( see example ):
 
-image::teamcity.png[]
+image::/docs/images/teamcity.png[]
 
 and set add the following to your config 
 
@@ -202,7 +202,7 @@ for example:
 ```
 for example like this
 
-image::html-report.png[]
+image::/docs/images/html-report.png[]
 
 If you set the `artifactsURI` configuration and you are not running on teamcity this setting will be ignored.
             
