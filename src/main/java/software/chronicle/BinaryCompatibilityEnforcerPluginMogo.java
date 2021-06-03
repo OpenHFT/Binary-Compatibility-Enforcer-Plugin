@@ -18,7 +18,9 @@ import static java.lang.Double.parseDouble;
 
 import static java.lang.String.format;
 
-@Mojo(name = "enforcer", defaultPhase = LifecyclePhase.VERIFY)
+// JS marked this as threadsafe - we download artefacts with mvn dependency:get and this I believe is
+// safe for multiple processes and/or threads. Marking this threadSafe gets rid of a build warning
+@Mojo(name = "enforcer", defaultPhase = LifecyclePhase.VERIFY, threadSafe = true)
 public class BinaryCompatibilityEnforcerPluginMogo extends AbstractMojo {
     private static final String OS = System.getProperty("os.name").toLowerCase();
     private static final boolean IS_LINUX = OS.startsWith("linux");
