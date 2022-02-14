@@ -1,12 +1,19 @@
 package software.chronicle;
 
+import org.apache.maven.execution.MavenSession;
 import org.apache.maven.model.Build;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
+import org.apache.maven.plugins.annotations.Component;
 import org.apache.maven.plugins.annotations.LifecyclePhase;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
+import org.apache.maven.project.DefaultProjectBuildingRequest;
 import org.apache.maven.project.MavenProject;
+import org.apache.maven.shared.transfer.artifact.DefaultArtifactCoordinate;
+import org.apache.maven.shared.transfer.artifact.resolve.ArtifactResolver;
+import org.apache.maven.shared.transfer.artifact.resolve.ArtifactResolverException;
+import org.apache.maven.shared.transfer.artifact.resolve.ArtifactResult;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -18,8 +25,6 @@ import static java.lang.Double.parseDouble;
 
 import static java.lang.String.format;
 
-// JS marked this as threadsafe - we download artefacts with mvn dependency:get and this I believe is
-// safe for multiple processes and/or threads. Marking this threadSafe gets rid of a build warning
 @Mojo(name = "enforcer", defaultPhase = LifecyclePhase.VERIFY, threadSafe = true)
 public class BinaryCompatibilityEnforcerPluginMogo extends AbstractMojo {
     private static final String OS = System.getProperty("os.name").toLowerCase();
@@ -35,8 +40,14 @@ public class BinaryCompatibilityEnforcerPluginMogo extends AbstractMojo {
     private static final String CMD_EXE = "C:\\WINDOWS\\system32\\cmd.exe";
     private static final boolean DISABLED = System.getProperty("skip.binary") != null;
 
+    @Component
+    private ArtifactResolver artifactResolver;
+
     @Parameter(defaultValue = "${project}", readonly = true, required = true)
     private MavenProject project;
+
+    @Parameter(defaultValue = "${session}", readonly = true, required = true)
+    private MavenSession session;
 
     @Parameter(defaultValue = "japi-compliance-checker -lib %s %s %s -report-path %s", readonly = true, required = false)
     private String expression;
@@ -53,7 +64,6 @@ public class BinaryCompatibilityEnforcerPluginMogo extends AbstractMojo {
     @Parameter(defaultValue = "target")
     private String reportLocation;
 
-
     public void execute() throws MojoExecutionException {
 
         if (DISABLED) {
@@ -62,7 +72,6 @@ public class BinaryCompatibilityEnforcerPluginMogo extends AbstractMojo {
         }
 
         getLog().info(format("%s\nBINARY COMPATIBILITY ENFORCER - %s%s", BAR, project.getArtifactId(), BAR));
-
 
         if ((IS_LINUX | IS_MAC) && !new File(BIN_SH).exists()) {
             getLog().info(BIN_SH + " not found");
@@ -86,7 +95,6 @@ public class BinaryCompatibilityEnforcerPluginMogo extends AbstractMojo {
             return;
         }
 
-
         final Build build = project.getBuild();
         if (build == null) {
             throw new MojoExecutionException("build not found");
@@ -98,24 +106,25 @@ public class BinaryCompatibilityEnforcerPluginMogo extends AbstractMojo {
 
         getLog().info(referenceVersion);
 
-        final String pathToJar1 = referencePath(groupId, artifactId, outputDirectory);
+        final String pathToJar1;
+        try {
+            pathToJar1 = referencePath(groupId, artifactId, outputDirectory);
+        } catch (ArtifactResolverException ex) {
+            throw new MojoExecutionException("Artifact to check against was not resolved", ex);
+        }
 
         getLog().debug("pathToJar1=" + pathToJar1);
-
         final String directory = build.getDirectory();
 
-
         final String pathToJar2 = format("%s%s%s.jar", directory, File.separator, finalName);
-
         getLog().debug("pathToJar2=" + pathToJar2);
-
 
         checkBinaryCompatibility(pathToJar1, pathToJar2, artifactId);
     }
 
     private String referencePath(final String groupId,
                                  final String artifactId,
-                                 final String outputDirectory) throws MojoExecutionException {
+                                 final String outputDirectory) throws MojoExecutionException, ArtifactResolverException {
         String pathToJar1 = null;
         if (isEmpty(referenceVersion)) {
 
@@ -123,10 +132,9 @@ public class BinaryCompatibilityEnforcerPluginMogo extends AbstractMojo {
             int i = version.indexOf(".");
             if (i != -1) {
 
-
                 referenceVersion = calculateDefaultRefVersion(version, i);
                 getLog().info("setting referenceVersion=" + referenceVersion);
-                if (pathToJar1 == null)
+                if (referenceVersion == null)
                     throw new MojoExecutionException("Please set <referenceVersion> config");
 
                 try {
@@ -156,7 +164,6 @@ public class BinaryCompatibilityEnforcerPluginMogo extends AbstractMojo {
         return pathToJar1;
     }
 
-
     static String calculateDefaultRefVersion(String version, int indexOfFirstDot) throws MojoExecutionException {
 
         boolean containsES = version.contains("ea");
@@ -171,48 +178,17 @@ public class BinaryCompatibilityEnforcerPluginMogo extends AbstractMojo {
                 "can not download default version=%s", version));
     }
 
+    private File downloadArtifact(final String group, final String artifactId, final String version, final String target) throws MojoExecutionException, ArtifactResolverException {
 
-    private File downloadArtifact(final String group, final String artifactId, final String version, final String target) throws MojoExecutionException {
-        final File tempFile = new File(target, artifactId + "-" + version + ".jar");
-        tempFile.delete();
-        //   final String command = format("mvn dependency:get -Dartifact=%s:%s:%s:jar -Dtransitive=false -Ddest=%s -DremoteRepositories=chronicle-enterprise-release::::https://nexus.chronicle.software/content/repositories/releases ", group, artifactId, version, tempFile);
-        final String command = format("mvn dependency:get -Dartifact=%s:%s:%s:jar -Dtransitive=false -Ddest=%s", group, artifactId, version, tempFile);
+        DefaultArtifactCoordinate coordinate = new DefaultArtifactCoordinate();
+        coordinate.setGroupId(group);
+        coordinate.setArtifactId(artifactId);
+        coordinate.setVersion(version);
 
-        getLog().info(command);
+        ArtifactResult res = artifactResolver.resolveArtifact(new DefaultProjectBuildingRequest( session.getProjectBuildingRequest() )
+                .setRemoteRepositories(project.getRemoteArtifactRepositories()), coordinate);
 
-        BufferedReader stdError = null;
-        Process p = null;
-        try {
-
-            p = new ProcessBuilder(IS_WIN ? CMD_EXE : BIN_SH, IS_WIN ? "/C" : "-c", command).start();
-
-            final BufferedReader stdInput = new BufferedReader(new
-                    InputStreamReader(p.getInputStream()));
-
-            stdError = new BufferedReader(new InputStreamReader(p.getErrorStream()));
-
-            stdInput.readLine();
-
-            for (; ; ) {
-                final String s1 = stdInput.readLine();
-                if (s1 == null) {
-                    dumpErrorToConsole(stdError);
-                    throw new MojoExecutionException("unable to download using command=" + command);
-                }
-
-                if (s1.contains("BUILD SUCCESS")) {
-                    break;
-                }
-
-                getLog().debug(s1);
-            }
-            return tempFile;
-        } catch (final Exception e) {
-            dumpErrorToConsole(stdError);
-            throw new MojoExecutionException(e.getMessage(), e);
-        } finally {
-            shutdown(p);
-        }
+        return res.getArtifact().getFile();
     }
 
     private void checkBinaryCompatibility(final String jar1, final String jar2, final String artifactName) throws MojoExecutionException {
@@ -250,7 +226,6 @@ public class BinaryCompatibilityEnforcerPluginMogo extends AbstractMojo {
                 }
 
                 final String report = s1.substring(REPORT.length());
-
 
                 if (parseDouble(binaryCompatibility) < binaryCompatibilityPercentageRequired) {
 
@@ -308,7 +283,6 @@ public class BinaryCompatibilityEnforcerPluginMogo extends AbstractMojo {
         }
     }
 
-
     public void checkJavaAPIComplianceCheckerInstalled() throws MojoExecutionException {
         Process p = null;
         BufferedReader stdError = null;
@@ -352,5 +326,4 @@ public class BinaryCompatibilityEnforcerPluginMogo extends AbstractMojo {
             }
         }
     }
-
 }
