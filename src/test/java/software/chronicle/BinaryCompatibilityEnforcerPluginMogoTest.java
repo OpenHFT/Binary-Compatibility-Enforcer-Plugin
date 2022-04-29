@@ -1,6 +1,5 @@
 package software.chronicle;
 
-
 import org.apache.maven.plugin.MojoExecutionException;
 import org.junit.Test;
 
@@ -19,6 +18,20 @@ public class BinaryCompatibilityEnforcerPluginMogoTest {
 
         assertEquals("1.2ea0", test("1.2ea3"));
         assertEquals("1.2ea0", test("1.2ea4-SNAPSHOT"));
+    }
+
+    @Test
+    public void ExtraOptionsTest() {
+        String actual = BinaryCompatibilityEnforcerPluginMogo.renderExtraOptions(
+                new ExtraOption[]{
+                        new ExtraOption("skip-internal-packages", "*my-internal-package*"),
+                        new ExtraOption("short", "")
+                }
+        );
+
+        String expected = "-skip-internal-packages *my-internal-package* -short";
+
+        assertEquals(expected, actual);
     }
 
     private String test(String version) throws MojoExecutionException {
