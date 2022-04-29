@@ -19,10 +19,11 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.Arrays;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 import static java.lang.Double.parseDouble;
-
 import static java.lang.String.format;
 
 @Mojo(name = "enforcer", defaultPhase = LifecyclePhase.VERIFY, threadSafe = true)
@@ -49,7 +50,7 @@ public class BinaryCompatibilityEnforcerPluginMogo extends AbstractMojo {
     @Parameter(defaultValue = "${session}", readonly = true, required = true)
     private MavenSession session;
 
-    @Parameter(defaultValue = "japi-compliance-checker -lib %s %s %s -report-path %s", readonly = true, required = false)
+    @Parameter(defaultValue = "japi-compliance-checker %s -lib %s %s %s -report-path %s", readonly = true, required = false)
     private String expression;
 
     @Parameter(defaultValue = "", required = false)
@@ -63,6 +64,9 @@ public class BinaryCompatibilityEnforcerPluginMogo extends AbstractMojo {
 
     @Parameter(defaultValue = "target")
     private String reportLocation;
+
+    @Parameter
+    private ExtraOption[] extraOptions;
 
     public void execute() throws MojoExecutionException {
 
@@ -185,7 +189,7 @@ public class BinaryCompatibilityEnforcerPluginMogo extends AbstractMojo {
         coordinate.setArtifactId(artifactId);
         coordinate.setVersion(version);
 
-        ArtifactResult res = artifactResolver.resolveArtifact(new DefaultProjectBuildingRequest( session.getProjectBuildingRequest() )
+        ArtifactResult res = artifactResolver.resolveArtifact(new DefaultProjectBuildingRequest(session.getProjectBuildingRequest())
                 .setRemoteRepositories(project.getRemoteArtifactRepositories()), coordinate);
 
         return res.getArtifact().getFile();
@@ -197,7 +201,7 @@ public class BinaryCompatibilityEnforcerPluginMogo extends AbstractMojo {
         Process p = null;
         try {
             final String reportOutput = constructReportOutputPath(artifactName, referenceVersion, project.getVersion());
-            final String command = format(expression, artifactName, jar1, jar2, reportOutput);
+            final String command = format(expression, renderExtraOptions(extraOptions), artifactName, jar1, jar2, reportOutput);
 
             getLog().info(command);
             p = new ProcessBuilder(IS_WIN ? CMD_EXE : BIN_SH, IS_WIN ? "/C" : "-c", command).start();
@@ -326,4 +330,11 @@ public class BinaryCompatibilityEnforcerPluginMogo extends AbstractMojo {
             }
         }
     }
+
+    static String renderExtraOptions(ExtraOption[] extraOptions) {
+        return Arrays.stream(extraOptions)
+                .map(Object::toString)
+                .collect(Collectors.joining(" "));
+    }
+
 }
