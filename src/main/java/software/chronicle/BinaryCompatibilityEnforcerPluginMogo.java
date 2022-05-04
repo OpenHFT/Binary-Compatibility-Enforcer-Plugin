@@ -20,6 +20,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.Arrays;
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
@@ -332,7 +333,7 @@ public class BinaryCompatibilityEnforcerPluginMogo extends AbstractMojo {
     }
 
     static String renderExtraOptions(ExtraOption[] extraOptions) {
-        return Arrays.stream(extraOptions)
+        return Arrays.stream(Optional.ofNullable(extraOptions).orElse(new ExtraOption[0]))
                 .map(Object::toString)
                 .collect(Collectors.joining(" "));
     }

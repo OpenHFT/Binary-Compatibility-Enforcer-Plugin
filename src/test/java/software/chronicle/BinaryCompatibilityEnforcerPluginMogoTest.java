@@ -34,6 +34,15 @@ public class BinaryCompatibilityEnforcerPluginMogoTest {
         assertEquals(expected, actual);
     }
 
+    @Test
+    public void ExtraOptionsNullTest() {
+        String actual = BinaryCompatibilityEnforcerPluginMogo.renderExtraOptions(null);
+
+        String expected = "";
+
+        assertEquals(expected, actual);
+    }
+
     private String test(String version) throws MojoExecutionException {
         return calculateDefaultRefVersion(version, version.indexOf("."));
     }
