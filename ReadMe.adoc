@@ -33,10 +33,12 @@ Not supported yet
 * Maven
 * Perl 5
 * https://github.com/lvc/japi-compliance-checker#install
-
+[source,shell script]
+----
 $git clone git@github.com:lvc/japi-compliance-checker.git
 $cd japi-compliance-checker/
-
+[source,shell script]
+----
 == Linxu
 
 ```
