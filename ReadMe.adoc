@@ -213,3 +213,13 @@ If you set the `artifactsURI` configuration and you are not running on teamcity 
             
 
 
+
+== Required compatibility checks
+
+Set `-Dbinary.compatibility.required=true` in the release compatibility job.
+Required mode fails if the shell/checker is missing, if `skip.binary` is set,
+or if reported compatibility is below the configured threshold.
+It also checks `.0` versions instead of applying the optional baseline shortcut.
+Install `japi-compliance-checker` and configure a resolvable reference artifact
+on that job. Missing tools in optional developer mode log `NOT CHECKED`;
+that warning is not a compatibility result.

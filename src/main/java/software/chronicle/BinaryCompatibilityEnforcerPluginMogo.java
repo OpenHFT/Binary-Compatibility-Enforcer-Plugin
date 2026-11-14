@@ -40,7 +40,8 @@ public class BinaryCompatibilityEnforcerPluginMogo extends AbstractMojo {
             "------------------------------------------";
     private static final String BIN_SH = "/bin/sh";
     private static final String CMD_EXE = "C:\\WINDOWS\\system32\\cmd.exe";
-    private static final boolean DISABLED = System.getProperty("skip.binary") != null;
+    @Parameter(property = "binary.compatibility.required", defaultValue = "false")
+    boolean required;
 
     @Component
     private ArtifactResolver artifactResolver;
@@ -71,7 +72,8 @@ public class BinaryCompatibilityEnforcerPluginMogo extends AbstractMojo {
 
     public void execute() throws MojoExecutionException {
 
-        if (DISABLED) {
+        if (System.getProperty("skip.binary") != null) {
+            if (required) throw new MojoExecutionException("Required binary compatibility check cannot be skipped");
             getLog().info(format("%s\nBINARY COMPATIBILITY ENFORCER - %s%s - disabled", BAR, project.getArtifactId(), BAR));
             return;
         }
@@ -79,24 +81,24 @@ public class BinaryCompatibilityEnforcerPluginMogo extends AbstractMojo {
         getLog().info(format("%s\nBINARY COMPATIBILITY ENFORCER - %s%s", BAR, project.getArtifactId(), BAR));
 
         if ((IS_LINUX | IS_MAC) && !new File(BIN_SH).exists()) {
-            getLog().info(BIN_SH + " not found");
+            unavailable(BIN_SH + " not found");
             return;
         } else if (IS_WIN && !new File(CMD_EXE).exists()) {
-            getLog().info(CMD_EXE + " not found");
+            unavailable(CMD_EXE + " not found");
             return;
         }
 
         getLog().info("Starting...");
 
         final String finalName = project.getBuild().getFinalName();
-        if (finalName.endsWith(".0-SNAPSHOT") || finalName.endsWith(".0")
-                || finalName.endsWith("ea0-SNAPSHOT") || finalName.endsWith("ea0"))
+        if (!required && (finalName.endsWith(".0-SNAPSHOT") || finalName.endsWith(".0")
+                || finalName.endsWith("ea0-SNAPSHOT") || finalName.endsWith("ea0")))
             return;
 
         try {
             checkJavaAPIComplianceCheckerInstalled();
         } catch (final MojoExecutionException e) {
-            getLog().warn(e.getMessage(), e);
+            unavailable(e.getMessage());
             return;
         }
 
@@ -127,7 +129,13 @@ public class BinaryCompatibilityEnforcerPluginMogo extends AbstractMojo {
         checkBinaryCompatibility(pathToJar1, pathToJar2, artifactId);
     }
 
-    private String referencePath(final String groupId,
+    private void unavailable(String reason) throws MojoExecutionException {
+        String message = "Binary compatibility NOT CHECKED: " + reason;
+        if (required) throw new MojoExecutionException(message);
+        getLog().warn(message + "; set -Dbinary.compatibility.required=true for a required release check");
+    }
+
+    protected String referencePath(final String groupId,
                                  final String artifactId,
                                  final String outputDirectory) throws MojoExecutionException, ArtifactResolverException {
         String pathToJar1 = null;
