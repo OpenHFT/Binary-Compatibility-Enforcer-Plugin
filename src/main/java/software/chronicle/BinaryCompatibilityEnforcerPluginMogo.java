@@ -264,11 +264,21 @@ public class BinaryCompatibilityEnforcerPluginMogo extends AbstractMojo {
                 throw new MojoExecutionException("Compatibility checker did not produce the requested report");
             if (value < binaryCompatibilityPercentageRequired)
                 throw new MojoExecutionException("BINARY COMPATIBILITY ENFORCER - FAILURE: " + value
-                        + "% is below " + binaryCompatibilityPercentageRequired + "%; report " + expectedReport.toURI());
-            getLog().info("BINARY COMPATIBILITY ENFORCER - SUCCESSFUL: " + value + "%; report " + expectedReport.toURI());
+                        + "% is below " + binaryCompatibilityPercentageRequired + "%; report " + reportUri(expectedReport));
+            getLog().info("BINARY COMPATIBILITY ENFORCER - SUCCESSFUL: " + value + "%; report " + reportUri(expectedReport));
         } catch (IOException failure) {
             throw new MojoExecutionException("Compatibility checker failed", failure);
         }
+    }
+
+    String reportUri(File report) {
+        String buildNumber = System.getProperty("teamcity.agent.dotnet.build_id");
+        String buildType = System.getProperty("teamcity.buildType.id");
+        java.net.URI local = report.toURI();
+        java.net.URI relative = project.getBasedir().toURI().relativize(local);
+        if (buildNumber == null || isEmpty(buildType) || isEmpty(artifactsURI) || relative.isAbsolute())
+            return local.toASCIIString();
+        return String.format("%s/%s/%s:id/%s", artifactsURI, buildType, buildNumber, relative.toASCIIString());
     }
 
     private static String shellQuote(String value) throws MojoExecutionException {

@@ -92,6 +92,28 @@ public class RequiredCompatibilityCheckTest {
         catch (MojoExecutionException expected) { assertTrue(expected.getMessage().contains("timed out")); }
         assertTrue("Timeout did not bound completion", System.nanoTime() - start < 10_000_000_000L);
     }
+    @Test public void retainsTeamCityReportLinks() throws Exception {
+        BinaryCompatibilityEnforcerPluginMogo mojo = mojo(true, true, 100);
+        Field field = BinaryCompatibilityEnforcerPluginMogo.class.getDeclaredField("project");
+        field.setAccessible(true);
+        File directory = ((MavenProject) field.get(mojo)).getBasedir();
+        File report = new File(directory, "target/report with spaces.html");
+        String oldBuild = System.getProperty("teamcity.agent.dotnet.build_id");
+        String oldType = System.getProperty("teamcity.buildType.id");
+        try {
+            System.setProperty("teamcity.agent.dotnet.build_id", "123");
+            System.setProperty("teamcity.buildType.id", "fixture");
+            set(mojo, "artifactsURI", "https://teamcity.invalid/repository/download");
+            assertEquals("https://teamcity.invalid/repository/download/fixture/123:id/target/report%20with%20spaces.html",
+                    mojo.reportUri(report));
+        } finally {
+            if (oldBuild == null) System.clearProperty("teamcity.agent.dotnet.build_id");
+            else System.setProperty("teamcity.agent.dotnet.build_id", oldBuild);
+            if (oldType == null) System.clearProperty("teamcity.buildType.id");
+            else System.setProperty("teamcity.buildType.id", oldType);
+        }
+    }
+
     public static class SleepingChecker {
         public static void main(String[] args) throws InterruptedException { Thread.sleep(60_000); }
     }
