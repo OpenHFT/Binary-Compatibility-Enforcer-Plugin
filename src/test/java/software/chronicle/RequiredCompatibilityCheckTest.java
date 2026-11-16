@@ -32,12 +32,18 @@ public class RequiredCompatibilityCheckTest {
         set(mojo, "reportLocation", "target");
         String separator = System.getProperty("os.name").startsWith("Windows") ? "&" : ";";
         set(mojo, "expression", "echo Binary compatibility: " + percent + "%%" + separator
-                + "echo Report: %5$s" + separator + "echo report > %5$s");
+                + reportLine() + separator + "echo report > %5$s");
         return mojo;
     }
     private static void set(Object object, String name, Object value) throws Exception {
         Field field = BinaryCompatibilityEnforcerPluginMogo.class.getDeclaredField(name);
         field.setAccessible(true); field.set(object, value);
+    }
+    private static String reportLine() {
+        // Windows echo preserves surrounding quotes; the real checker prints a bare path.
+        return System.getProperty("os.name").startsWith("Windows")
+                ? "for %%r in (%5$s) do @echo Report: %%~r"
+                : "echo Report: %5$s";
     }
     @Test public void optionalMissingCheckerDoesNotClaimSuccess() throws Exception { mojo(false, false, 100).execute(); }
     @Test public void requiredMissingCheckerFails() throws Exception {
@@ -70,26 +76,28 @@ public class RequiredCompatibilityCheckTest {
         String ending = System.getProperty("os.name").startsWith("Windows") ? "&exit /b 7" : ";exit 7";
         String separator = System.getProperty("os.name").startsWith("Windows") ? "&" : ";";
         set(mojo, "expression", "echo Binary compatibility: 100%%" + separator
-                + "echo Report: %5$s" + separator + "echo report > %5$s" + ending);
+                + reportLine() + separator + "echo report > %5$s" + ending);
         try { mojo.execute(); fail("Checker crash must fail"); }
         catch (MojoExecutionException expected) { assertTrue(expected.getMessage().contains("exited 7")); }
     }
     @Test public void missingReportFails() throws Exception {
         BinaryCompatibilityEnforcerPluginMogo mojo = mojo(true, true, 100);
         String separator = System.getProperty("os.name").startsWith("Windows") ? "&" : ";";
-        set(mojo, "expression", "echo Binary compatibility: 100%%" + separator + "echo Report: %5$s");
+        set(mojo, "expression", "echo Binary compatibility: 100%%" + separator + reportLine());
         try { mojo.execute(); fail("Missing report must fail"); }
         catch (MojoExecutionException expected) { assertTrue(expected.getMessage().contains("requested report")); }
     }
     @Test public void hungCheckerIsBounded() throws Exception {
         BinaryCompatibilityEnforcerPluginMogo mojo = mojo(true, true, 100);
         String java = new File(System.getProperty("java.home"), "bin/java").getPath();
-        set(mojo, "expression", "\"" + java + "\" -cp \"" + System.getProperty("java.class.path")
-                + "\" " + (System.getProperty("os.name").startsWith("Windows") ? "\"" + SleepingChecker.class.getName() + "\"" : "'" + SleepingChecker.class.getName() + "'"));
+        boolean windows = System.getProperty("os.name").startsWith("Windows");
+        String command = "\"" + java + "\" -cp \"" + System.getProperty("java.class.path")
+                + "\" " + (windows ? "\"" + SleepingChecker.class.getName() + "\"" : "'" + SleepingChecker.class.getName() + "'");
+        set(mojo, "expression", windows ? "\"" + command + "\"" : command);
         set(mojo, "timeoutSeconds", 1L);
         long start = System.nanoTime();
         try { mojo.execute(); fail("Hung checker must fail"); }
-        catch (MojoExecutionException expected) { assertTrue(expected.getMessage().contains("timed out")); }
+        catch (MojoExecutionException expected) { assertTrue(expected.toString() + "; cause=" + expected.getCause(), expected.getMessage().contains("timed out")); }
         assertTrue("Timeout did not bound completion", System.nanoTime() - start < 10_000_000_000L);
     }
     @Test public void retainsTeamCityReportLinks() throws Exception {

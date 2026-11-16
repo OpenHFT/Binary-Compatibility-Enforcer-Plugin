@@ -22,9 +22,13 @@ import java.util.ArrayList;
 import java.util.List;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.nio.file.FileSystemException;
 import java.nio.file.Path;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.stream.Collectors;
 
 import static java.lang.Double.parseDouble;
@@ -308,8 +312,29 @@ public class BinaryCompatibilityEnforcerPluginMogo extends AbstractMojo {
             throw new MojoExecutionException("Interrupted waiting for compatibility checker", interrupted);
         } finally {
             shutdown(process);
-            Files.deleteIfExists(output);
-            Files.deleteIfExists(error);
+            deleteTemporaryFile(output);
+            deleteTemporaryFile(error);
+        }
+    }
+
+    private void deleteTemporaryFile(Path path) throws IOException {
+        long deadline = System.nanoTime() + TimeUnit.SECONDS.toNanos(1);
+        for (;;) {
+            try {
+                Files.deleteIfExists(path);
+                return;
+            } catch (FileSystemException failure) {
+                // Windows may briefly retain redirected handles after process exit is reported.
+                if (!IS_WIN || System.nanoTime() >= deadline)
+                    throw failure;
+                try {
+                    Thread.sleep(10);
+                } catch (InterruptedException interrupted) {
+                    Thread.currentThread().interrupt();
+                    failure.addSuppressed(interrupted);
+                    throw failure;
+                }
+            }
         }
     }
 
@@ -351,11 +376,26 @@ public class BinaryCompatibilityEnforcerPluginMogo extends AbstractMojo {
         try {
             Class<?> handleType = Class.forName("java.lang.ProcessHandle");
             Object handle = Process.class.getMethod("toHandle").invoke(process);
+            List<CompletableFuture<?>> exits = new ArrayList<>();
             try (java.util.stream.Stream<?> children = (java.util.stream.Stream<?>) handleType.getMethod("descendants").invoke(handle)) {
                 children.forEach(child -> {
-                    try { handleType.getMethod("destroyForcibly").invoke(child); }
+                    try {
+                        handleType.getMethod("destroyForcibly").invoke(child);
+                        exits.add((CompletableFuture<?>) handleType.getMethod("onExit").invoke(child));
+                    }
                     catch (ReflectiveOperationException failure) { getLog().debug(failure); }
                 });
+            }
+            // Windows retains redirected log handles until the child processes have exited.
+            for (CompletableFuture<?> exit : exits) {
+                try {
+                    exit.get(5, TimeUnit.SECONDS);
+                } catch (ExecutionException | TimeoutException failure) {
+                    getLog().warn("Checker descendant did not terminate", failure);
+                } catch (InterruptedException interrupted) {
+                    Thread.currentThread().interrupt();
+                    break;
+                }
             }
         } catch (ReflectiveOperationException unavailableOnJava8) {
             getLog().debug("Descendant cleanup unavailable on this JVM", unavailableOnJava8);

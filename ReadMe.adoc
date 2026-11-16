@@ -234,3 +234,6 @@ The checker must finish, produce the requested nonempty report, and emit a finit
 JAPICC exit 1 denotes incompatibility (binary or source); the binary threshold still determines acceptance.
 Other nonzero statuses, missing reports, malformed percentages and timeouts fail the check.
 Java 9+ also terminates descendant processes on timeout; Java 8 can terminate only the direct process.
+Cleanup waits for descendant exit before removing redirected logs. On Windows,
+log deletion retries transient file-system failures for up to one second per file
+because handle release can lag process exit. A lasting cleanup failure is still reported.
