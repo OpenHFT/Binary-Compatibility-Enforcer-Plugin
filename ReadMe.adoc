@@ -213,3 +213,27 @@ If you set the `artifactsURI` configuration and you are not running on teamcity 
             
 
 
+
+== Required compatibility checks
+
+Set `-Dbinary.compatibility.required=true` in the release compatibility job.
+Required mode fails if the shell/checker is missing, if `skip.binary` is set,
+or if reported compatibility is below the configured threshold.
+It also checks `.0` versions instead of applying the optional baseline shortcut.
+Install `japi-compliance-checker` and configure a resolvable reference artifact
+on that job. Missing tools in optional developer mode log `NOT CHECKED`;
+that warning is not a compatibility result.
+
+== Checker completion and paths
+
+The default invocation passes executable and arguments separately, including paths containing spaces.
+`binary.compatibility.executable` selects the checker executable; `binary.compatibility.timeoutSeconds`
+sets a positive completion limit (default 120 seconds). A custom `expression` remains a trusted shell command.
+
+The checker must finish, produce the requested nonempty report, and emit a finite percentage between 0 and 100.
+JAPICC exit 1 denotes incompatibility (binary or source); the binary threshold still determines acceptance.
+Other nonzero statuses, missing reports, malformed percentages and timeouts fail the check.
+Java 9+ also terminates descendant processes on timeout; Java 8 can terminate only the direct process.
+Cleanup waits for descendant exit before removing redirected logs. On Windows,
+log deletion retries transient file-system failures for up to one second per file
+because handle release can lag process exit. A lasting cleanup failure is still reported.
