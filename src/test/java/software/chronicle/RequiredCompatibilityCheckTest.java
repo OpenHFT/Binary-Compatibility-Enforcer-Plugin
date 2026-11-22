@@ -8,6 +8,7 @@ import org.junit.Rule;
 import org.junit.rules.TemporaryFolder;
 import java.io.File;
 import java.lang.reflect.Field;
+import java.nio.file.Files;
 import static org.junit.Assert.*;
 
 public class RequiredCompatibilityCheckTest {
@@ -89,16 +90,21 @@ public class RequiredCompatibilityCheckTest {
     }
     @Test public void hungCheckerIsBounded() throws Exception {
         BinaryCompatibilityEnforcerPluginMogo mojo = mojo(true, true, 100);
+        File retained = temporary.newFile("checker child retained file");
         String java = new File(System.getProperty("java.home"), "bin/java").getPath();
         boolean windows = System.getProperty("os.name").startsWith("Windows");
         String command = "\"" + java + "\" -cp \"" + System.getProperty("java.class.path")
-                + "\" " + (windows ? "\"" + SleepingChecker.class.getName() + "\"" : "'" + SleepingChecker.class.getName() + "'");
+                + "\" " + (windows ? "\"" + SleepingChecker.class.getName() + "\"" : "'" + SleepingChecker.class.getName() + "'")
+                + " \"" + retained.getAbsolutePath() + "\"";
         set(mojo, "expression", windows ? "\"" + command + "\"" : command);
-        set(mojo, "timeoutSeconds", 1L);
+        set(mojo, "timeoutSeconds", 3L);
         long start = System.nanoTime();
         try { mojo.execute(); fail("Hung checker must fail"); }
         catch (MojoExecutionException expected) { assertTrue(expected.toString() + "; cause=" + expected.getCause(), expected.getMessage().contains("timed out")); }
         assertTrue("Timeout did not bound completion", System.nanoTime() - start < 10_000_000_000L);
+        assertEquals("Checker child must have reached its blocking operation", 1, retained.length());
+        // On Windows an orphaned child keeps this handle open and prevents deletion.
+        Files.delete(retained.toPath());
     }
     @Test public void retainsTeamCityReportLinks() throws Exception {
         BinaryCompatibilityEnforcerPluginMogo mojo = mojo(true, true, 100);
@@ -123,7 +129,12 @@ public class RequiredCompatibilityCheckTest {
     }
 
     public static class SleepingChecker {
-        public static void main(String[] args) throws InterruptedException { Thread.sleep(60_000); }
+        public static void main(String[] args) throws Exception {
+            try (java.io.RandomAccessFile retained = new java.io.RandomAccessFile(args[0], "rw")) {
+                retained.write(1);
+                Thread.sleep(60_000);
+            }
+        }
     }
 
 }
