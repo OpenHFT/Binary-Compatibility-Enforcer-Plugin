@@ -1,6 +1,7 @@
 package software.chronicle;
 
 import org.apache.maven.execution.MavenSession;
+import org.apache.maven.artifact.repository.ArtifactRepository;
 import org.apache.maven.model.Build;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
@@ -213,8 +214,11 @@ public class BinaryCompatibilityEnforcerPluginMogo extends AbstractMojo {
         coordinate.setArtifactId(artifactId);
         coordinate.setVersion(version);
 
+        List<ArtifactRepository> repositories = new ArrayList<>();
+        for (Object repository : project.getRemoteArtifactRepositories())
+            repositories.add(ArtifactRepository.class.cast(repository));
         ArtifactResult res = artifactResolver.resolveArtifact(new DefaultProjectBuildingRequest(session.getProjectBuildingRequest())
-                .setRemoteRepositories(project.getRemoteArtifactRepositories()), coordinate);
+                .setRemoteRepositories(repositories), coordinate);
 
         return res.getArtifact().getFile();
     }
@@ -299,6 +303,7 @@ public class BinaryCompatibilityEnforcerPluginMogo extends AbstractMojo {
         Path output = Files.createTempFile("japicc-output-", ".log");
         Path error = Files.createTempFile("japicc-error-", ".log");
         Process process = null;
+        Throwable primaryFailure = null;
         try {
             process = new ProcessBuilder(command).redirectOutput(output.toFile()).redirectError(error.toFile()).start();
             if (!process.waitFor(timeoutSeconds, TimeUnit.SECONDS))
@@ -309,11 +314,31 @@ public class BinaryCompatibilityEnforcerPluginMogo extends AbstractMojo {
                     new String(Files.readAllBytes(error), StandardCharsets.UTF_8));
         } catch (InterruptedException interrupted) {
             Thread.currentThread().interrupt();
-            throw new MojoExecutionException("Interrupted waiting for compatibility checker", interrupted);
+            MojoExecutionException failure = new MojoExecutionException("Interrupted waiting for compatibility checker", interrupted);
+            primaryFailure = failure;
+            throw failure;
+        } catch (IOException | MojoExecutionException | RuntimeException | Error failure) {
+            primaryFailure = failure;
+            throw failure;
         } finally {
             shutdown(process);
-            deleteTemporaryFile(output);
-            deleteTemporaryFile(error);
+            IOException cleanupFailure = null;
+            for (Path path : Arrays.asList(output, error)) {
+                try {
+                    deleteTemporaryFile(path);
+                } catch (IOException failure) {
+                    if (cleanupFailure == null)
+                        cleanupFailure = failure;
+                    else
+                        cleanupFailure.addSuppressed(failure);
+                }
+            }
+            if (cleanupFailure != null) {
+                if (primaryFailure != null)
+                    primaryFailure.addSuppressed(cleanupFailure);
+                else
+                    throw cleanupFailure;
+            }
         }
     }
 
@@ -398,13 +423,36 @@ public class BinaryCompatibilityEnforcerPluginMogo extends AbstractMojo {
                 }
             }
         } catch (ReflectiveOperationException unavailableOnJava8) {
-            getLog().debug("Descendant cleanup unavailable on this JVM", unavailableOnJava8);
+            if (IS_WIN)
+                shutdownWindowsTree(process);
+            else
+                getLog().debug("Descendant cleanup unavailable on this JVM", unavailableOnJava8);
         }
         process.destroyForcibly();
         try {
             if (!process.waitFor(5, TimeUnit.SECONDS)) getLog().warn("Checker did not terminate");
         } catch (InterruptedException interrupted) {
             Thread.currentThread().interrupt();
+        }
+    }
+
+    private void shutdownWindowsTree(Process process) {
+        Process killer = null;
+        try {
+            long pid = WindowsProcessId.get(process);
+            killer = new ProcessBuilder("taskkill", "/PID", Long.toString(pid), "/T", "/F")
+                    .redirectOutput(new File("NUL")).redirectError(new File("NUL")).start();
+            if (!killer.waitFor(5, TimeUnit.SECONDS))
+                getLog().warn("Timed out stopping checker process tree " + pid);
+            else if (killer.exitValue() != 0 && process.isAlive())
+                getLog().warn("Could not stop checker process tree " + pid);
+        } catch (IOException | ReflectiveOperationException failure) {
+            getLog().warn("Could not stop Java 8 checker descendants", failure);
+        } catch (InterruptedException interrupted) {
+            Thread.currentThread().interrupt();
+        } finally {
+            if (killer != null && killer.isAlive())
+                killer.destroyForcibly();
         }
     }
 
