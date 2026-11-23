@@ -33,7 +33,9 @@ public class CheckerOutputBackpressureTest {
         set(mojo, "reportLocation", "target");
         mojo.binaryCompatibilityPercentageRequired = 100;
         String java = new File(System.getProperty("java.home"), "bin/java").getAbsolutePath();
-        String command = quote(java) + " -cp " + quote(System.getProperty("java.class.path")) + " "
+        // The fixture needs only test classes; Maven's classpath can exceed cmd.exe's command limit.
+        String classPath = new File(NoisyChecker.class.getProtectionDomain().getCodeSource().getLocation().toURI()).getAbsolutePath();
+        String command = quote(java) + " -cp " + quote(classPath) + " "
                 + quote(NoisyChecker.class.getName()) + " " + quote(report.toString());
         // cmd.exe needs an outer pair of quotes when the executable path is quoted.
         if (windows()) command = "\"" + command + "\"";
