@@ -93,7 +93,9 @@ public class RequiredCompatibilityCheckTest {
         File retained = temporary.newFile("checker child retained file");
         String java = new File(System.getProperty("java.home"), "bin/java").getPath();
         boolean windows = System.getProperty("os.name").startsWith("Windows");
-        String command = "\"" + java + "\" -cp \"" + System.getProperty("java.class.path")
+        // Avoid sending Maven's unrelated dependencies through the bounded Windows shell command line.
+        String classPath = new File(SleepingChecker.class.getProtectionDomain().getCodeSource().getLocation().toURI()).getAbsolutePath();
+        String command = "\"" + java + "\" -cp \"" + classPath
                 + "\" " + (windows ? "\"" + SleepingChecker.class.getName() + "\"" : "'" + SleepingChecker.class.getName() + "'")
                 + " \"" + retained.getAbsolutePath() + "\"";
         set(mojo, "expression", windows ? "\"" + command + "\"" : command);
