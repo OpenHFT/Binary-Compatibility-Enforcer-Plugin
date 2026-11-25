@@ -305,7 +305,7 @@ public class BinaryCompatibilityEnforcerPluginMogo extends AbstractMojo {
         Process process = null;
         Throwable primaryFailure = null;
         try {
-            process = new ProcessBuilder(command).redirectOutput(output.toFile()).redirectError(error.toFile()).start();
+            process = CheckerProcess.builder(command, IS_WIN).redirectOutput(output.toFile()).redirectError(error.toFile()).start();
             if (!process.waitFor(timeoutSeconds, TimeUnit.SECONDS))
                 throw new MojoExecutionException("Compatibility checker timed out after " + timeoutSeconds + " seconds");
             if (Files.size(output) > 1024 * 1024 || Files.size(error) > 1024 * 1024)
