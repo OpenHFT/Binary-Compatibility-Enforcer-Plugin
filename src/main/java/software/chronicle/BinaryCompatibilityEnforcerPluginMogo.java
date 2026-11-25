@@ -205,7 +205,8 @@ public class BinaryCompatibilityEnforcerPluginMogo extends AbstractMojo {
             final String command = format(expression, renderExtraOptions(extraOptions), artifactName, jar1, jar2, reportOutput);
 
             getLog().info(command);
-            p = new ProcessBuilder(IS_WIN ? CMD_EXE : BIN_SH, IS_WIN ? "/C" : "-c", command).start();
+            p = CheckerProcess.builder(Arrays.asList(IS_WIN ? CMD_EXE : BIN_SH,
+                    IS_WIN ? "/C" : "-c", command), IS_WIN).start();
 
             final BufferedReader stdInput = new BufferedReader(new
                     InputStreamReader(p.getInputStream()));
@@ -293,7 +294,8 @@ public class BinaryCompatibilityEnforcerPluginMogo extends AbstractMojo {
         BufferedReader stdError = null;
         try {
 
-            p = new ProcessBuilder(IS_WIN ? CMD_EXE : BIN_SH, IS_WIN ? "/C" : "-c", "japi-compliance-checker -l").start();
+            p = CheckerProcess.builder(Arrays.asList(IS_WIN ? CMD_EXE : BIN_SH,
+                    IS_WIN ? "/C" : "-c", "japi-compliance-checker -l"), IS_WIN).start();
 
             final BufferedReader stdInput = new BufferedReader(new
                     InputStreamReader(p.getInputStream()));

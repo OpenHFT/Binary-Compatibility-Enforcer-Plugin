@@ -80,6 +80,16 @@ export PATH="$PATH:~/<path>/japi-compliance-checker"
 
 = Configuration
 
+On Unix, the checker subprocess ignores `SIGPIPE`. JAPICC closes its nested
+`javap` diagnostic pipe early; JVM startup messages (including `_JAVA_OPTIONS`)
+must not kill `javap` before it writes the API data. JVM options, including heap
+limits, remain inherited. Checker exit codes and compatibility checks remain in
+effect. Windows launches retain their existing signal behaviour.
+
+To exercise the real checker, including a removed-method failure control, run
+`mvn verify -Dchecker.test.executable=/usr/bin/japi-compliance-checker` with a JDK.
+Without that option the two external-tool integration cases are explicitly skipped.
+
 |===
 | parameter  | default value | Example | Required / Optional
 
